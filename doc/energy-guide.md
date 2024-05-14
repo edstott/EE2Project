@@ -25,7 +25,7 @@ Your starter kit contains:
 | Qty. | Item |
 | ---- | ---- |
 | 3    | Bidirectional Buck/Boost SMPS Module |
-| 4    | Buck SMPS Module |
+| 4    | Buck SMPS Module - Configured as LED Driver |
 | 4    | Power LED Module |
 | 1    | PV Array |
 | 2    | Clamp Multimeter |
@@ -34,7 +34,7 @@ Your starter kit contains:
 
 ### Software
 
-Starter code for the SMPS module is based on the Power Electronics and Power Systems lab. 
+Starter code for the Bidirectional SMPS modules is based on the Power Electronics and Power Systems lab. A skeleton code for the LED driver SMPSs will be provided.
 
 ### Lab Benches
 
@@ -59,7 +59,7 @@ A budget is available for you to purchase additional items
 
 ### Grid configuration
 
-Your system should use a central bus with a constant voltage.
+Your system should use a central DC grid (or bus) with a constant voltage.
 The load LEDs will draw from power from this bus as required, and your energy sources should supply power to maintain the bus voltage at the desired level.
 The bus can be implemented simply by connecting modules to the provided busbar module with 4mm test leads.
 
@@ -84,7 +84,7 @@ The voltage of PV cells varies with both the level of irradiance and inversely w
 Since power is the product of voltage and current, there exists a point where power output is maximum for a given irradiance.
 You need to draw current from the array to extract power, but too much current will reduce the voltage to the point where power reduces.
 
-The first step to optimal use of the PV array is to characterise its I-V (current-voltage) curve.
+The first step to optimal use of the PV array is to characterise its I-V (current-voltage) curve. This will need to be completed outside but can be achieved even in overcast conditions.
 Place the PV array in a location with consistent irradiance and connect it to Port A of an SMPS module.
 Connect Port B to a power resistor (supplied in your kit).
 Then, sweep the duty cycle of the SMPS and log the input voltage and current.
