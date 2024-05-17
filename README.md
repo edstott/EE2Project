@@ -58,6 +58,8 @@ The system must balance energy supply and demand and use forecasting to minimise
 Some inputs and outputs of the system, such as sunshine intensity, costs of energy and power demand, will vary over a simulated day.
 These quantities follow established trends but they are not entirely predictable, so decisions (e.g. whether to store or sell excess energy) require modelling to deliver the best expected outcome - this is a similar problem to those faced by stock market traders.
 
+![Energy Storage Flywheel](doc/temporal-power-flywheel.jpg)
+
 #### Core technical challenges
 
 - Develop network-connected power converters, based on the Power Electronics lab hardware, that can control loads and match the differing voltage and current characteristics of the components in the system

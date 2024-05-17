@@ -8,12 +8,11 @@
 2. The visualisation shall be generated with the supplied PYNQ-1000 SoC FPGA platform with an accelerator for the soft logic of the FPGA that computes the inner loops of the calculation
    1. The accelerator shall be described using Verilog or SystemVerilog
    2. The accelerator shall provide an interface with the integrated CPU for the adjustment of parameters
-   3. The number formats and word lengths used in the accelerator shall be selected to optimise the trade-off between visualisation accuracy and computational throughput
+   3. The number formats and word lengths used in the accelerator should be selected to optimise the trade-off between visualisation accuracy and computational throughput
    4. The computational throughput of the accelerated implementation shall exceed that of a CPU-only alternative programmed with C, C++ or Cython
-   5. The video output shall be 1440x960 pixels with a refresh rate of 60Hz
 3. The system shall provide a user interface to enhance the function of the visualisation as an educational tool.
     1. The user interface may be implemented using separate hardware to the visualisation computer
-    2. The user interface shall allow a user to adjust parameters of the visualisation in an intuitive fashion
+    2. The user interface shall allow a user to adjust parameters of the visualisation in an intuitive or interesting way
     3. The user interface should provide information about the visualisation as an overlay on the image or via a separate medium
 
 ## Resources Provided
@@ -23,20 +22,34 @@
 Pynq kits can be borrowed from EEE Stores. They contain:
 
 - A Pynq FPGA board
-- Power Supply
 - HDMI cable and HDMI-USB adapter
 - Ethernet cable and Ethernet-USB adapter
 - USB Cable
+- WiFi adapter
 
 ### Software
 
 Tutorials and code examples for the Pynq can be found on the official GitHub repository.
 
-An example project shows generation of a video pattern using the Zynq CPU core and FPGA soft care
+An example project shows generation of a video pattern using the Zynq CPU core and FPGA logic.
 
 ### Project budget
 
 The project requirements specify that the Pynq board is used to generate the visualisation. However, you may wish to purchase additional components to implement the user interface and a budget is available for this.
+
+### Getting started
+
+These are suggested tasks for making a start on the project:
+
+You should begin by following the [Pynq setup guide](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html)
+
+The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, load the notebooks provided on this repository
+
+1. Research mathematical principles that would make good visualisation and could be implemented with an algorithm that iterates over the image in a raster pattern.
+2. Set up a hardware simulation flow with Verilator that allows you to run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
+3. Consider interesting methods for human interaction. Look for hardware suggestions or software libraries that might help. Begin an implementation.
+4. Familiarise yourself with the Pynq operating system and Python overlay interface using the demo notebook. Create a placeholder visualisation in software and set up an interface with a remote server or database that will pass in user parameters
+5. Set up the Vivado tool flow that will allow you to generate your own Pynq overlay
 
 ### Technical information and suggestions
 
@@ -49,10 +62,10 @@ The Pynq board can be powered by the USB interface (PROG UART) or an external po
 You will need network connectivity to interface with your board.
 
 1. Ethernet (direct): you can plug the Zynq board into an ethernet port on your home router with the included cable. You will need to find the board's IP address to connect - you can do this by looking at DHCP leases on the configuration page for your router, or by typing `ip addr` into the USB command prompt. The board  won't work by connecting it to an ethernet port on the College network unless it happens to have been registered with ICT.
-2. Ethernet (via host): the kit includes a USB ethernet adapter, which you can use to connect your Pynq board to the internet via your computer. Connect the Pynq to the ethernet socket and plug the adapter into a USB port on your computer. Then, you need to share your internet connection:
-   1. Windows: follow [these instructions](https://www.tomshardware.com/how-to/share-internet-connection-windows-ethernet-wi-fi) to share your internet connection with the ethernet adapter you have plugged in. Once it is connected, you can find the IP address of the Zynq board by... 
-   2. MacOS: ...
-3. WiFi: the kit also includes a USB WiFi dongle. Plug it into the USB Host port on the Pynq and the operating system will automatically set it up as a networking device. You will need to access a terminal via 
+2. Ethernet (via host): the kit includes a USB ethernet adapter, which you can use to connect your Pynq board to the internet via your computer. Connect the Pynq to the ethernet socket and plug the adapter into a USB port on your computer. Then, you need to share your internet connection with the ethernet adapter you have plugged in:
+   1. Windows: follow [these instructions](https://www.tomshardware.com/how-to/share-internet-connection-windows-ethernet-wi-fi).
+   2. MacOS: follow [these instructions](https://support.apple.com/en-gb/guide/mac-help/mchlp1540/mac)
+3. WiFi: the kit also includes a USB WiFi dongle. Plug it into the USB Host port on the Pynq and the operating system will automatically set it up as a networking device. You will need to access a terminal via Ethernet or USB cable to set up WiFi.
 
 #### Development tools
 
@@ -72,19 +85,19 @@ The purpose of the project is to showcase hardware implementation of an algorith
 
 Visualising fractals is a common exercise in this domain, since they are visually interesting and a good test of computational throughput. An implementation for Pynq [already exists](), but this doesn't mean you can't implement your own.
 
-Simulations 
+Simulations are a popular option for visualisation demos, but they tend to be harder to parallelise because the simulation has a global state that must be shared between execution units. For example, in [N-body simulation](https://en.wikipedia.org/wiki/N-body_simulation), the behaviour of every particle in the system depends on the state of every other particle. Then, the particles must be rendered, which requires random access to a video frame buffer (since each particle could be anywhere on the screen), instead of much simpler sequential access. Therefore, these kinds of problems are not recommended unless you are feeling very confident about your digital design skills.
 
-### Getting started
+#### Working with Pynq Overlays
 
-These are suggested tasks for making a start on the project:
+In Pynq, an overlay is a bitstream (programmable logic configuration) plus a Python library that interfaces with it. You will need to develop programmable logic but a Python library is optional, though it would make your code neater and more reusable.
 
-You should begin by following the [Pynq setup guide](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html)
+The example design is based on the PYNQ base configuration with the addition of a block that generates a video test pattern.
+That block is written in Verilog and connected to the rest of the system with the IP Intergator tool.
+The block has two main interfaces:
 
-The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, load the notebooks provided on this repository
+1. An AXI Stream Output (Master - AMD still uses outdated master/slave terminology), which outputs the video data in raster order. A stream interface is just a bus (32-bits in this case) of data, with a valid signal to indicate each clock cycle when it has been updated. A ready signal acts as _backpressure_, which allows the receiver to pause transmission if it is not ready. A done signal indicates the end of a packet of data, which is a complete frame in the case of video data.
+2. An AXI-Lite Slave port, which allows the control registers of the block to appear as a memory-mapped peripheral. If the user (via Python code on the processor system) wants to change a parameter of the visualisation, they would write the parameter to a specific address on the memory bus. The bus logic of the CPU and IP integrator system ensures that writes to this address are directed to this logic block. When the design is compiled, the address map for the entire system is written to a file, which is then used to find the address for a peripheral when it is accessed byt the user code. The AXI-Lite interface has slower data throughput than the streaming interface.
 
-- Research mathematical principles that would make good visualisation and could be implemented with an algorithm that iterates over the image in a raster pattern.
-- Set up a hardware simulation flow with Verilator that allows you to run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
-- Consider interesting methods for human interaction. Look for hardware suggestions or software libraries that might help. Begin an implementation.
-- Familiarise yourself with the Pynq operating system and Python overlay interface using the demo notebook. Create a placeholder visualisation in software and set up an interface with a remote server or database that will pass in user parameters
-- Set up the Vivado tool flow that will allow you to generate your own Pynq overlay
+The stream output from the block is connected to a Video DMA (direct memory access). This block can read and write to the main memory system independently from the CPU. When a video frame is generated, the DMA writes it to an array in memory, where it can be accessed by the CPU or read by another DMA block for output to the video device. DMA blocks are configured by the CPU core (by a separate AXI-Lite interface) but after that they move data around the system without further involvement, which is much quicker than using the CPU core to access every pixel.
 
+Since the example design is already working, all you need to do is add your logic to the frame generator block and make sure that it can still stream pixels out as required. The rest of the system will handle the rest.
