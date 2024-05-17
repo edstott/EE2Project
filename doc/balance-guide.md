@@ -34,7 +34,7 @@ Starter code is provided for the ESP32 MCU to demonstrate stepper motor control 
 
 ## Suggestions
 
-This section conatins advice on the following sections:
+This section contains advice on the following sections:
 1. [Robot Function](#robot-function)
 2. [Balancing](#balancing)
 3. [Onboard Computing](#onboard-computing)
