@@ -114,11 +114,13 @@ The first step to optimal use of the PV array is to characterise its I-V (curren
 Place the PV array in a location with consistent irradiance and connect it to Port A of an SMPS module.
 Connect Port B to a power resistor (supplied in your kit).
 Then, sweep the duty cycle of the SMPS and log the input voltage and current.
-Find the duty cycle which results in maximum power and you have found the most efficient operating point for the PV array.
+Find the duty cycle which results in maximum power and you have found the most efficient operating point for the PV array. The cell has an open-circuit voltage $V_O$, a short-circuit current $I_S$, and a point ($V_M$, $I_M$) where power is maximal.
 
 | ![IV Characteristic of a PV Cell](PV-real.svg) |
 |:--:|
-| _Typical I-V characteristic of a PV cell. The cell has an open-circuit voltage $V_O$, a short-circuit current $I_S$, and a point ($V_M$, $I_M$) where power is maximal_
+| _Typical I-V characteristic of a PV cell_ | 
+
+
 
 Unfortunately, this operating point varies with irradiance and temperature, so you cannot simply configure an SMPS to maintain a constant duty cycle to achieve an optimal output.
 Instead, you need to implement _maximum power point tracking_ to alter voltage and current according to conditions.
