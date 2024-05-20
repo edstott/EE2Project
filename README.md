@@ -36,6 +36,8 @@ Each of the project options contains elements that are suited to students from y
 
 ![Balance robot starter kit](doc/balance-robot.jpg)
 
+[Detailed Requirements and Technical Information](/doc/balance-guide.md)
+
 The aim of this project is to build a demonstrator robot that can balance on two wheels.
 You should choose an application for the robot that will demonstrate interaction with human users or the environment.
 A robot platform is provided, which contains wheels, motors, batteries, power electronics and mounting points for embedded computing platforms
@@ -51,6 +53,8 @@ A robot platform is provided, which contains wheels, motors, batteries, power el
 ### Option: Smart Grid
 
 ![A Photovoltaic installation in Spain](doc/Façana_Fotvoltaica.jpg)
+
+[Detailed Requirements and Technical Information](/doc/energy-guide.md)
 
 The aim of this project is to build an energy management system for connecting a home to a smart grid.
 A photovoltaic array and mechanical flywheel are provided for energy generation and storage.
@@ -70,6 +74,8 @@ These quantities follow established trends but they are not entirely predictable
 ### Option: Mathematics Accelerator
 
 ![Visualisation of a fractal by Wolfgang Beyer with the program Ultra Fractal 3. - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=321973](doc/fractal.jpg)
+
+[Detailed Requirements and Technical Information](/doc/accelerator-guide.md)
 
 The aim of this project is to create an educational tool that can visualise a mathematical function.
 Evaluation of the function will be computationally intensive, which means that a custom-logic FPGA accelerator is a good choice for achieving the necessary responsiveness for human interaction.

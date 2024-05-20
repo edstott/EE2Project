@@ -4,7 +4,7 @@
 
 1. The system shall display a visualisation of a mathematical function that is computed in real time
     1. The function shall be computationally intensive, such that it is not trivial to generate the visualisation at the required resolution and frame rate
-    2. The computation should be 'embarrassingly parallel', which means that different elements of the problem, typically pixels, can be computed independently with no data dependence between them
+    2. The computation should be 'embarrassingly parallel', which means that multiple solutions of the problem, pixels in this case, can be computed independently with no data dependence between them
 2. The visualisation shall be generated with the supplied PYNQ-1000 SoC FPGA platform with an accelerator for the soft logic of the FPGA that computes the inner loops of the calculation
    1. The accelerator shall be described using Verilog or SystemVerilog
    2. The accelerator shall provide an interface with the integrated CPU for the adjustment of parameters
@@ -43,11 +43,11 @@ These are suggested tasks for making a start on the project:
 
 You should begin by following the [Pynq setup guide](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html)
 
-The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, load the notebooks provided on this repository
+The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, load the notebooks provided on the project repository
 
-1. Research mathematical principles that would make good visualisation and could be implemented with an algorithm that iterates over the image in a raster pattern.
-2. Set up a hardware simulation flow with Verilator that allows you to run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
-3. Consider interesting methods for human interaction. Look for hardware suggestions or software libraries that might help. Begin an implementation.
+1. Research areas of mathematics that would make good visualisation and could be implemented with an algorithm that iterates over the image in a raster pattern.
+2. Set up a hardware simulation flow with Verilator that can run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
+3. Consider interesting methods for human interaction. Look for hardware suggestions or software libraries that might help
 4. Familiarise yourself with the Pynq operating system and Python overlay interface using the demo notebook. Create a placeholder visualisation in software and set up an interface with a remote server or database that will pass in user parameters
 5. Set up the Vivado tool flow that will allow you to generate your own Pynq overlay
 
@@ -71,7 +71,7 @@ You will need network connectivity to interface with your board.
 
 The Pynq has a Jupyter notebook server installed, which allows you to edit and run Python code interactively via a web browser
 
-The configuration for the FPGA logic in a Pynq system is called an overlay, and to edit it you will need [Vivado](https://www.xilinx.com/support/download.html). Vivado can be run on Windows or Linux, so to run it on MacOS you'll need to install it in a Virtual Machine. The overlay is loaded onto the FPGA with a driver and Python API on the Pynq processor system, so you won't need USB drivers to download the overlay from your computer.
+The configuration for the FPGA logic in a Pynq system is called an overlay, and to edit it you will need [Vivado](https://www.xilinx.com/support/download.html) (version to be confirmed). Vivado can be run on Windows or Linux, so to run it on MacOS you'll need to install it in a Virtual Machine. The overlay is loaded onto the FPGA with a driver and Python API on the Pynq processor system, so you won't need USB drivers to download the overlay from your computer.
 
 Minimise the installation size for Vivado by enabling support only for the Zynq-7000 SoC, which is the device family used on the Pynq-Z1 board.
 
@@ -89,15 +89,15 @@ Simulations are a popular option for visualisation demos, but they tend to be ha
 
 #### Working with Pynq Overlays
 
-In Pynq, an overlay is a bitstream (programmable logic configuration) plus a Python library that interfaces with it. You will need to develop programmable logic but a Python library is optional, though it would make your code neater and more reusable.
+In Pynq, an overlay is a bitstream (programmable logic configuration) plus a Python library that interfaces with it. You will need to develop programmable logic but a Python library is optional because you can use the pre-existing base classes. A custom library for your overlay would make your code neater and more reusable.
 
 The example design is based on the PYNQ base configuration with the addition of a block that generates a video test pattern.
-That block is written in Verilog and connected to the rest of the system with the IP Intergator tool.
+That block is written in Verilog and connected to the rest of the system with the IP Integrator tool.
 The block has two main interfaces:
 
 1. An AXI Stream Output (Master - AMD still uses outdated master/slave terminology), which outputs the video data in raster order. A stream interface is just a bus (32-bits in this case) of data, with a valid signal to indicate each clock cycle when it has been updated. A ready signal acts as _backpressure_, which allows the receiver to pause transmission if it is not ready. A done signal indicates the end of a packet of data, which is a complete frame in the case of video data.
 2. An AXI-Lite Slave port, which allows the control registers of the block to appear as a memory-mapped peripheral. If the user (via Python code on the processor system) wants to change a parameter of the visualisation, they would write the parameter to a specific address on the memory bus. The bus logic of the CPU and IP integrator system ensures that writes to this address are directed to this logic block. When the design is compiled, the address map for the entire system is written to a file, which is then used to find the address for a peripheral when it is accessed byt the user code. The AXI-Lite interface has slower data throughput than the streaming interface.
 
-The stream output from the block is connected to a Video DMA (direct memory access). This block can read and write to the main memory system independently from the CPU. When a video frame is generated, the DMA writes it to an array in memory, where it can be accessed by the CPU or read by another DMA block for output to the video device. DMA blocks are configured by the CPU core (by a separate AXI-Lite interface) but after that they move data around the system without further involvement, which is much quicker than using the CPU core to access every pixel.
+The stream output from the block is connected to a Video DMA (direct memory access) IP Block. This block can write to the main memory system independently from the CPU. When a video frame is generated, the DMA writes the image to an array in memory, where it can be accessed by the CPU or read by another DMA block for output to the video device. DMA blocks are configured by the CPU core by a separate AXI-Lite interface but after that they move data around the system without further involvement, which is much quicker than using the CPU core to access every pixel.
 
-Since the example design is already working, all you need to do is add your logic to the frame generator block and make sure that it can still stream pixels out as required. The rest of the system will handle the rest.
+Since the example design is already working, you can implement your design just by adding your logic to the frame generator block. Make sure that it can still stream pixels out as required. The rest of the system will handle the rest. Modifying the design in the IP Intergator is not necessary, except in advanced cases.

@@ -2,7 +2,7 @@
 
 ## Requirements
 
-1. The robot shall demonstrate a form of autonomous behaviour based inputs from a camera and/or other sensors
+1. The robot shall demonstrate a form of autonomous behaviour based on inputs from a camera and/or other sensors
 2. The robot shall balance on two wheels, with a centre of gravity above the axis of rotation of the wheels
 3. There shall be remote control interface that allows a user to enable or control the autonomous behaviour, and to move the robot manually in two dimensions around a flat surface
     1. The user interface shall display useful information about the power status of the robot, such as power consumption and remaining battery energy
@@ -17,7 +17,7 @@ Your starter kit contains:
 
 | Qty. | Item |
 | ---- | ---- |
-| 2    | Robot Chassis with Motors and Power PCB |
+| 2    | Robot Chassis Kits with Motors and Power PCB |
 | 4    | Temporary Robot Stabilisers |
 | 4    | 7.2V 2000mAh NiMH battery |
 | 2    | Raspberry Pi 3 Model B with keyboard |
@@ -82,7 +82,7 @@ You can use lighting to help, in the form of flexible LED strips, glowing beacon
 A robot operating in real-world environments will need to cope with greater uncertainty, and it may encounter moving objects, uneven surfaces and challenging lighting conditions.
 Typical tasks for robots in this environment could be meet-and-greet/personal assistance, search and rescue and domestic help.
 Think about how you can constrain the problem so you can develop functionality incrementally.
-A robot in a real-world enviroment may be reliant on third-party vision libraries, so make sure you understand the capabilities and limits of any candidate libraries before you commit yourself to achieving a particular goal.
+A robot in a real-world environment may be reliant on third-party vision libraries, so make sure you understand the capabilities and limits of any candidate libraries before you commit yourself to achieving a particular goal.
 
 ![A meet and greet robot at The Smithsonian Museum](Pepper-Portrait-1477x1920.jpg)
 
@@ -112,30 +112,30 @@ Finding the right setpoint for a static condition can avoid needing to use an in
 ![Diagram of a generic PID](PID_en.png)
 
 Once the robot can balance in a static position, the next task is to make it move around.
-One way to do this is to use a cascaded controller, which means that the setpoint for the inner loop (desired tilit angle in this case) is itself set by a PID controller.
+One way to do this is to use a cascaded controller, which means that the setpoint for the inner loop (desired tilt angle in this case) is itself set by a PID controller.
 If the robot is tilted off balance and that tilt angle is constant, then the motors must accelerate continuously at a constant rate to provide a force that counteracts the toppling force.
 Therefore, if you want to move the robot to another location, your control algorithm should change the tilt angle for a short time to accelerate the robot, then tilt it in the opposite direction to slow it down before it reaches its target position.
-A PID controller can do this, but note that the acceleration required to maintain a tilt angle will quickly speed the wheels to their maximum speed, at which point the robot will fall over.
+A PID controller can do this, but note that the acceleration required to hold the robot at a non-zero tilt angle will quickly speed the wheels to their maximum speed, at which point the robot will fall over.
 A good first step is to make the outer control loop a speed controller.
-That way, you can ensure that the robot will bring the tilt angle back to the balanced condition before the wheels reach their speed limit.
+That way, the robot will bring the tilt angle back to the balanced condition before the wheels reach their speed limit.
 
 #### Measuring Tilt
 
 Tilt measurement is achieved with a combined accelerometer and gyroscope sensor.
 The sensor and a measurement library are provided and the base unit of the chassis has an internal mounting point for the sensor.
-Mouninting the sensor in this part of the chassis means there is a strong mechanical coupling to the wheels so measurement is more accurate.
+Mounting the sensor in this part of the chassis means there is a strong mechanical coupling to the wheels so measurement is more accurate.
 The accelerometer measures in three axes, so it can be used to detect the direction of gravity and therefore the tilt angle of the robot with respect to gravity.
 However, without additional information, it is impossible to distinguish between a gravitational force and a force due to acceleration.
-That means if the robot accelerates in the longitudianal (back/forward) direction, either to move the robot or just to counteract a tilitng force, an error will be introduced in the tilt angle measurement.
+That means if the robot accelerates in the longitudinal (back/forward) direction, either to move the robot or just to counteract a tilting force, an error will be introduced in the tilt angle measurement.
 
 This error can be reduced by using the gyroscope measurement.
 Silicon gyroscopes of this type measure the differential of tilt angle, i.e. the rate of change of angle.
 This differential can be used directly to calculate the D term of a PID controller, but an absolute measure of tilt is needed for the P term.
-Integrating the output of the sensor will work, but only for a short time because any small error in the measurement (there is always error) will be accumulated until the result becomes completley useless.
+Integrating the output of the sensor will work, but only for a short time because any small error in the measurement (there is always error) will be accumulated until the result becomes completely useless.
 
 These problems can be resolved by using a _Complementary Filter_.
 Notice that the integral of the gyroscope is useful over short time periods, before the error grows too large.
-Meanwhile, the tilt angle calculation from the accelerometer will have short-lived error transients due to longitudanal movements, but over a long period of time these will average to zero because the robot cannot accelerate indefinitely.
+Meanwhile, the tilt angle calculation from the accelerometer will have short-lived error transients due to longitudinal movements, but over a long period of time these will average to zero because the robot cannot accelerate indefinitely.
 Therefore, a complementary filter works by applying a low-pass filter to the tile measured by acceleration and summing it with a high-pass-filtered tilt measured by the gyroscope.
 
 The form of the complementary filter is: $\Theta_{n} = (1-C) \Theta_a + C (\frac{d\Theta_g}{dt} \Delta t + \Theta_{n-1})$
@@ -144,7 +144,7 @@ Here, $\Theta_{n}$ is the calculated tilt at iteration $n$, while $\Theta_{n-1}$
 $\Theta_a$ is the tilt angle measured by accelerometer and $\frac{d\Theta_g}{dt}$ is the differential tilt angle measured with the gyroscope.
 $\Delta t$ is the time interval between iterations and $C$ is a factor between 0 and 1 that sets the time constant - typically it is close to 1.
 
-With $C$ close to 1, you can see that $\Theta_{n}$ at any given iteration is mostly derived by integrating the gyroscope measurement (multipling by $\Delta T$) and adding it to the previous tilt angle.
+With $C$ close to 1, you can see that $\Theta_{n}$ at any given iteration is mostly derived by integrating the gyroscope measurement (multiplying by $\Delta T$) and adding it to the previous tilt angle.
 This means any rapid changes in tilt, which are measured accurately by the gyroscope without interference from longitudinal acceleration, are reflected in $\Theta_{n}$.
 Because $C<1$, any error in $\frac{d\Theta_g}{dt}$ will not accumulate forever and eventually it will converge to a constant error in $\Theta_{n}$, which is manageable.
 Meanwhile, the small contribution from $\Theta_a$ will gradually accumulate so, in static conditions after a long period of time, $\Theta_{n} = \Theta_{a} + e_g$, where $e_g$ is the converged accumulated error from the gyroscope.
@@ -160,7 +160,7 @@ Raspberry Pi is complete single-board computer that runs Linux.
 It has HDMI graphics, USB host ports and on board Wi-Fi and Bluetooth.
 You can connect it up with the provided HDMI cable and keyboard and interact with it using the command line or desktop environment.
 
-You can write code for the Rapsberry Pi using many languages and environments, but the most relevant are likely to be C++ or Python.
+You can write code for the Raspberry Pi using many languages and environments, but the most relevant are likely to be C++ or Python.
 
 #### ESP32
 
@@ -177,21 +177,21 @@ The USB port can be connected to the Raspberry Pi, allowing you to exchange mess
 
 ### Chassis
 
+[Instructions for assembling the chassis](balance-assembly)
+
 The provided robot chassis allows you to build a robot and get it moving around, including balancing.
 The chassis is incomplete at the top, so you may wish to make a head unit that suits the function of your robot.
 For example you could mount a Raspberry Pi camera or LEDs for user feedback.
-There is no need to redeisgn the lower part of the chassis, and it is likely that requests for 3D printing of these parts in the lab will be refused so that other jobs can be prioritised.
-
-[Instructions for assembling the chassis](balance-assembly)
+There is no need to redesign the lower part of the chassis.
 
 #### Power PCB
 
 The chassis includes a PCB for power functions in the robot.
-We provide this PCB so that you can get your robot moving quickly, and to avoid saftey risks from handling the large currents that can be sourced by the batteries.
+We provide this PCB so that you can get your robot moving quickly, and to avoid safety risks from handling the large currents that can be sourced by the batteries.
 The PCB contains:
 
 - Battery terminals and a main fuse to prevent excessive current
-- Power switches, one main switch to conenct the batteries and one motor switch to enable the motors. The second switch allows you to power your logic and sensors from the battery without running the motors.
+- Power switches, one main switch to connect/isolate the batteries and one motor switch to power the motors. The second switch allows you to maintain power to your logic and sensors when the motors are isolated.
 - A 5V, 3A power converter so you can run a Raspberry Pi and other logic from the batteries via 2 USB power outputs
 - Two stepper motor drivers, which drive the motors in one angular increment for every input pulse. A 3-way configuration switch sets the angular resolution (microstepping).
 - Two current sense resistors, which provide a voltage difference that you can measure to find the current used by the motors and logic
@@ -222,22 +222,22 @@ J2 is for power monitoring and it has the following pinout:
 | 3   | I5   | PWR  | Current sense for 5V supply ⚠ |
 | 4   | 5V   | PWR  | 5V supply ⚠ |
 | 5   | IM   | PWR  | Current sense for motor supply ⚠ |
-| 6   | VM   | PWR  | Motor supply volatge ⚠ |
+| 6   | VM   | PWR  | Motor supply voltage ⚠ |
 
 > [!WARNING]  
-> Pins marked ⚠ will destroy your logic (Raspberry Pi, ESP32) instantly if you connect them direclty to an I/O pin.
+> Pins marked ⚠ will destroy your logic (Raspberry Pi, ESP32) instantly if you connect them directly to an I/O pin.
 > They are also not current limited and they could cause damage from excessive current flow.
 > Do not use these pins to power your logic - use the USB connections instead as they are more reliable.
 
 Using J2 connections to monitor voltage and current requires care to avoid causing damage.
-The current sense pins are connected to small value resistors in series with their associated supply so you can measure the volage difference across the resistors.
+The current sense pins are connected to small value resistors in series with their associated supply so you can measure the voltage difference across the resistors.
 
 Use the following rules to use J2 connections safely and effectively:
 
 - You will always need some kind of analogue interface circuit to reduce the voltage from the monitoring pins and connect them to an ADC input.
 - Test your interface circuit carefully with a bench PSU and a multimeter before connecting it to your batteries and logic
 - Ensure that your circuit is constructed and connected robustly. In particular, ensure that the ground connection cannot come lose because that would cause your output voltage to rise to the level of the input voltage.
-- Use a 100kΩ resitor in series with your connections to prevent large current flow
+- Use a 100kΩ resistor in series with your ADC connections to prevent large current flow
 
 The current measurement resistors are _high side_, meaning that they are in series with the positive rail of the relevant supply.
 That means, for example, a current of 1A in the 5V supply would give you outputs of 5V and 4.95V on the I5 and 5V pins respectively.
