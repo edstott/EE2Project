@@ -1,0 +1,9 @@
+*.gen
+*.cache
+*.ip_user_files
+*.runs
+*.sim
+*.vcd
+*.log
+*.dcp
+/maths-accelerator/base/base.srcs/sources_1/bd/base/ip
