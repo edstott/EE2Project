@@ -9,17 +9,20 @@
 #define STEPPER1_STEP_PIN 17  //Arduino D8
 #define STEPPER2_DIR_PIN 4    //Arduino D11
 #define STEPPER2_STEP_PIN 14  //Arduino D10
+#define STEPPER_EN 15         //Arduino D12
+
+// Diagnostic pin for oscilloscope
 #define TOGGLE_PIN  32        //Arduino A4
 
 const int PRINT_INTERVAL = 500;
 const int LOOP_INTERVAL = 10;
+const int  STEPPER_INTERVAL_US = 20;
+
 const float kx = 20.0;
 
-#define STEPPER_INTERVAL_US      20
-
+//Global objects
 ESP32Timer ITimer(3);
-uint32_t intCount = 0;
-Adafruit_MPU6050 mpu;         //SCL: Arduino D3, SDA: Arduino D4
+Adafruit_MPU6050 mpu;         //Default pins for I2C are SCL: IO22/Arduino D3, SDA: IO21/Arduino D4
 
 step step1(STEPPER_INTERVAL_US,STEPPER1_STEP_PIN,STEPPER1_DIR_PIN );
 step step2(STEPPER_INTERVAL_US,STEPPER2_STEP_PIN,STEPPER2_DIR_PIN );
@@ -30,9 +33,13 @@ step step2(STEPPER_INTERVAL_US,STEPPER2_STEP_PIN,STEPPER2_DIR_PIN );
 bool TimerHandler(void * timerNo)
 {
   static bool toggle = false;
+
+  //Update the stepper motors
   step1.runStepper();
   step2.runStepper();
-  digitalWrite(TOGGLE_PIN,toggle);
+
+  //Indicate that the ISR is running
+  digitalWrite(TOGGLE_PIN,toggle);  
   toggle = !toggle;
 	return true;
 }
@@ -65,6 +72,10 @@ void setup()
   //Set motor acceleration values
   step1.setAccelerationRad(10.0);
   step2.setAccelerationRad(10.0);
+
+  //Enable the stepper motor drivers
+  pinMode(STEPPER_EN,OUTPUT);
+  digitalWrite(STEPPER_EN, false);
 
 }
 

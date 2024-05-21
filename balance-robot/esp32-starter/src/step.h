@@ -20,9 +20,9 @@ public:
     }
 
     //Update the stepper motor, performing a step and updating the speed as necessary. Call every interval μs
-//Note: ESP32 doesn't support floating point calculations in an ISR, so this function only uses integer operations
     void runStepper(){
-
+        //Note: ESP32 doesn't support floating point calculations in an ISR, so this function only uses integer operations
+    
         //Increment speed calculation interval timer
         speedTimer += interval;
 
@@ -59,7 +59,7 @@ public:
             stepTimer = 0;
         }
 
-        //Recalculate step interval if it hasn't been done for a while
+        //Recalculate step interval if the last update was longer ago than MAX_SPEED_INTERVAL_US
         if (speedTimer > MAX_SPEED_INTERVAL_US)
             updateSpeed();
 

@@ -121,7 +121,7 @@ That way, the robot will bring the tilt angle back to the balanced condition bef
 
 #### Measuring Tilt
 
-Tilt measurement is achieved with a combined accelerometer and gyroscope sensor.
+Tilt measurement is achieved with a MPU6050 combined accelerometer and gyroscope sensor.
 The sensor and a measurement library are provided and the base unit of the chassis has an internal mounting point for the sensor.
 Mounting the sensor in this part of the chassis means there is a strong mechanical coupling to the wheels so measurement is more accurate.
 The accelerometer measures in three axes, so it can be used to detect the direction of gravity and therefore the tilt angle of the robot with respect to gravity.
@@ -174,6 +174,19 @@ The ESP32 has a USB device port, which allows you to download code and observe t
 Take care when printing messages on the serial terminal, because complex or frequent messages can prevent your code from executing at the expected speed.
 In particular, do not add serial print statements to high-frequency interrupt functions.
 The USB port can be connected to the Raspberry Pi, allowing you to exchange messages between the two computers.
+
+Starter code for the ESP32 [is provided](../balance-robot/esp32-starter/).
+It runs the stepper motors at a speed proportional to the angle of tilt measured by the accelerometer.
+This isn't the correct algorithm to achieve balancing, but it does show integration of the MPU6050 and stepper motors.
+An Adafruit library is used to communicate with the MPU6050 and the stepper library is written in-house and included as a header file.
+It's designed for high-speed interrupt operation on the ESP32 with a frequently-changing motor acceleration parameter, which isn't supported by main Arduino library for stepper motors.
+
+The starter code is configured as a [PlatformIO](https://platformio.org/) project, which is a Visual Studio Code plugin for embedded programming. The code uses the Arduino framework, giving access to Arduino libraries and the structure based on `setup()` and `loop()`.
+
+See the definitions in the code to find the pin allocations for connection to the power PCB and MPU6050.
+The full pin mapping of the ESP32 breakout PCB is shown below. The outer pin numbers IO0-IO35 are the ESP32 pin numbers to use in your code, while A0-5 and D0-13 are the Arduino pin numbers marked on the breakout PCB.
+
+![ESP32 pin mapping](ESP32-adapter.png)
 
 ### Chassis
 
