@@ -227,7 +227,7 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 [Schematic of the LED Driver](./LED_Driver_SCM.pdf)
 
-[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](./LED_SMPS_Example.py)
+[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](./LED_Driver_Example.py)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
