@@ -54,6 +54,8 @@ An external webserver provides information about demands and externalities that 
 
 The values returned by the webserver change every 5 seconds. They are computed by summing a periodic component, which follows a repeating 5-minute cycle, with a randomised component. Each cycle approximates the characteristics of a day in real life. Data is returned in JSON format and the code used to generate the webserver output is provided for reference.
 
+The webserver is available at [https://icelec50015.azurewebsites.net/](https://icelec50015.azurewebsites.net/). There are various URIs that return JSON objects, all linked from the index page. The webserver code can be seen in its [GitHub repository](https://github.com/edstott/ICelec50015).
+
 ### Project Budget
 
 A budget is available for you to purchase additional items, but it should be possible to complete the project with the equipment provided.
