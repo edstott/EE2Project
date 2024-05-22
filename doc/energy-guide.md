@@ -207,6 +207,8 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 [Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
 
+[Example code for Lab SMPS - Be aware that closed loop mode may not be stable, it was not tuned for your system](./SMPS_2024_Bidirectional.py)
+
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
 | Circuit Type | Buck or Boost | |
@@ -224,6 +226,8 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 ### LED Driver SMPS
 
 [Schematic of the LED Driver](./LED_Driver_SCM.pdf)
+
+[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](./LED_SMPS_Example.py)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
