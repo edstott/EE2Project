@@ -205,7 +205,7 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 ### Lab SMPS
 
-
+![Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
@@ -222,6 +222,8 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 *The Buck/Boost switch determines which port is used to power all the support circuitry on the board (Pico, Current Sensor, MOSFET drivers etc.), this port has a minimum voltage of 6-7V for this function. If the switch is set to Buck then Port A must meet the minimum voltage, if its set to Boost then Port B must meet the minimum voltage.
 
 ### LED Driver SMPS
+
+![Schematic of the LED Driver](./LED_Driver_SCM.pdf)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
