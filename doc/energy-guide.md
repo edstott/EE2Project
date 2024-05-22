@@ -200,3 +200,71 @@ The flywheels are limited in number, so you may wish to explore alternatives to 
 Your kit contains 2 supercapacitors rated at 0.25F and 18V each, which will store around 50J of energy in total when charged to the maximum SMPS voltage. The terminal voltage of a capacitor increases with the square root of the stored energy, which is a similar characteristic to the flywheel where $E \propto \omega^2$. So they are, to an extent, interchangeable.
 
 It is also possible to emulate storage with a bench PSU and a bidirectional SMPS. Connect the PSU to port A and configure the SMPS to regulate the output port B at a defined voltage. Then, vary the output voltage in proportion to the integral of the current measured at port B, which is exactly the behaviour of a capacitor, and similar to a flywheel. For additional realism, you could emulate inefficient storage by adding resistors in series and/or parallel with the output port. The resistors could be real, or their effect could be modelled in the SMPS code.
+
+## Appendix - Circuit Specifications
+
+### Lab SMPS
+
+[Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
+
+[Example code for Lab SMPS - Be aware that closed loop mode may not be stable, it was not tuned for your system](./SMPS_2024_Bidirectional.py)
+
+| Specification | Value | Unit |
+| ------------- | ----- | ---- |
+| Circuit Type | Buck or Boost | |
+| Current Sensing | Bidirectional at Port B positive line | |
+| Controller Type | Raspberry Pi Pico | |
+| Controller Power Source | USB, Port A* or Port B* | |
+| Base Code | SMPS_Bidirectional.py | |
+| PWM Frequency | 100 | kHz |
+| Port A Voltage* | 0 - 17.5 | V |
+| Port B Voltage* | 0 - 17.5 | V |
+| Max Current | 5 | A |
+
+*The Buck/Boost switch determines which port is used to power all the support circuitry on the board (Pico, Current Sensor, MOSFET drivers etc.), this port has a minimum voltage of 6-7V for this function. If the switch is set to Buck then Port A must meet the minimum voltage, if its set to Boost then Port B must meet the minimum voltage.
+
+### LED Driver SMPS
+
+[Schematic of the LED Driver](./LED_Driver_SCM.pdf)
+
+[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](./LED_Driver_Example.py)
+
+| Specification | Value | Unit |
+| ------------- | ----- | ---- |
+| Circuit Type | Buck or Boost | |
+| Current Sensing | Unidirectional at output negative line | |
+| Controller Type | Raspberry Pi Pico | |
+| Controller Power Source | USB or Input Port | |
+| Base Code | LED_Driver.py | |
+| PWM Frequency | 100 | kHz |
+| Input Voltage | 7 - 17.5 | V |
+| Output Voltage | 0 - 17.5 | V |
+| Max Current | ~500 | mA |
+
+### LED Loads
+
+| Specification | Value | Unit |
+| ------------- | ----- | ---- |
+| Power Rating | 1 | W |
+| Voltage Drop (varies with colour) | ~3 | V |
+| Current Rating (also varies with colour) | ~300 | mA |
+
+### PV Panels
+
+[Datasheet for PV Panel](https://static.rapidonline.com/pdf/502676_v1.pdf)
+
+| Specification | Value | Unit |
+| ------------- | ----- | ---- |
+| V<sub>OC</sub> | 5 | V |
+| I<sub>SC</sub> | 230 | mA |
+
+### Supercapacitor
+
+[Datasheet for Supercapacitor](https://www.mouser.co.uk/ProductDetail/Cornell-Dubilier-CDE/DSM254Q018W075PB?qs=rQFj71Wb1eXTUSitfenP%2Fw%3D%3D)
+
+| Specification | Value | Unit |
+| ------------- | ----- | ---- |
+| Max Voltage | 18 | V |
+| Capacitance | 0.25 | F |
+| ESR | ~4 | Ohms |
+| Current Limit (5s Peak) | 350 | mA | 
