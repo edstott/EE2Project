@@ -205,7 +205,7 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 ### Lab SMPS
 
-![Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
+[Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
@@ -223,7 +223,7 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 ### LED Driver SMPS
 
-![Schematic of the LED Driver](./LED_Driver_SCM.pdf)
+[Schematic of the LED Driver](./LED_Driver_SCM.pdf)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
@@ -246,6 +246,8 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 | Current Rating (also varies with colour) | ~300 | mA |
 
 ### PV Panels
+
+[Datasheet for PV Panel](https://static.rapidonline.com/pdf/502676_v1.pdf)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
