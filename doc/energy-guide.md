@@ -256,6 +256,8 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 ### Supercapacitor
 
+[Datasheet for Supercapacitor](https://www.mouser.co.uk/ProductDetail/Cornell-Dubilier-CDE/DSM254Q018W075PB?qs=rQFj71Wb1eXTUSitfenP%2Fw%3D%3D)
+
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
 | Max Voltage | 18 | V |
