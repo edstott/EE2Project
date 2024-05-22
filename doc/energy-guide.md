@@ -34,7 +34,7 @@ Your starter kit contains:
 
 ### Software
 
-Starter code for the Bidirectional SMPS modules is based on the Power Electronics and Power Systems lab. A skeleton code for the LED driver SMPSs will be provided.
+Starter code for the Bidirectional SMPS modules is based on the Power Electronics and Power Systems lab. [A skeleton code for the LED driver SMPSs is provided](#appendix---circuit-specifications).
 
 ### Lab Benches
 
@@ -119,8 +119,6 @@ Find the duty cycle which results in maximum power and you have found the most e
 | ![IV Characteristic of a PV Cell](PV-real.svg) |
 |:--:|
 | _Typical I-V characteristic of a PV cell_ | 
-
-
 
 Unfortunately, this operating point varies with irradiance and temperature, so you cannot simply configure an SMPS to maintain a constant duty cycle to achieve an optimal output.
 Instead, you need to implement _maximum power point tracking_ to alter voltage and current according to conditions.
@@ -207,7 +205,7 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 [Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
 
-[Example code for Lab SMPS - Be aware that closed loop mode may not be stable, it was not tuned for your system](./SMPS_2024_Bidirectional.py)
+[Example code for Lab SMPS - Be aware that closed loop mode may not be stable, it was not tuned for your system](../smart-grid/SMPS_2024_Bidirectional.py)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
@@ -225,9 +223,9 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 ### LED Driver SMPS
 
-[Schematic of the LED Driver](./LED_Driver_SCM.pdf)
+[Schematic of the LED Driver](LED_Driver_SCM.pdf)
 
-[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](./LED_Driver_Example.py)
+[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](../smart-grid/LED_Driver_Example.py)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
