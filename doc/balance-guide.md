@@ -253,7 +253,7 @@ Use the following rules to use J2 connections safely and effectively:
 - Use a 100kΩ resistor in series with your ADC connections to prevent large current flow
 
 The current measurement resistors are _high side_, meaning that they are in series with the positive rail of the relevant supply.
-That means, for example, a current of 1A in the 5V supply would give you outputs of 5V and 4.95V on the I5 and 5V pins respectively.
+The resistance is 0.01Ω, which means, for example, a current of 1A in the 5V supply would give you outputs of 5V and 4.99V on the I5 and 5V pins respectively.
 You could reduce both of these voltages with potential dividers and measure both with an ADC input to find the difference, but the accuracy and noise might be poor.
 A better method would be to build a _differential amplifier_ from an opamp, which will amplify the difference between two inputs and present it as a single voltage relative to a reference.
 For example, the case above with a differential gain of 10 and a 1.25V reference would give an output of 1.75V, which is convenient voltage for measuring with an ADC on a 3.3V microcontroller.
