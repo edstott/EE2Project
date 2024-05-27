@@ -1,9 +1,2 @@
-
-*.cache/
-*.ip_user_files/
-*.runs/
-*.sim/
-*.vcd
-*.log
-*.dcp/
-*.gen/
+maths-accelerator/overlay/base
+maths-accelerator/overlay/NA/ps7_summary.html

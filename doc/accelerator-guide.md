@@ -179,19 +179,28 @@ To summarise the `ready` and `valid` signals:
 ### Building the Starter Project
 
 1. Install [Vivado 2023.2](https://www.xilinx.com/support/download.html)
-2. [Download](https://imperiallondon-my.sharepoint.com/:u:/g/personal/estott_ic_ac_uk/ET92KD1aUgpNvWLN8UcPsKwBkc7whPVdenlb7QPyes7HkA?e=bQZwQQ) and unzip the Vivado project. Open the project in Vivado 2023.2
-3. Generate the block design with IP Integrator. This converts the block design to Verilog netlists and creates the hardware handoff file `.hwh` with information about the bus structure and address map for the operating system.
+2. Clone this repository onto your computer
+3. Run the build script that generates the project
+   1. Start Vivado 2023.2
+   2. Go to Window→TCL Console
+   3. In the console, type `cd <repository path>/maths-accelerator/overlay`. You will need to use a Unix-style path with `/` instead of `\`
+   4. Enter the command `./source base.tcl`
+4. The script generates a Vivado project in \<repository path\>/maths-accelerator/overlay/base. Open it in Vivado
+5. Generate the block design with IP Integrator. This converts the block design to Verilog netlists and creates the hardware handoff file `.hwh` with information about the bus structure and address map for the operating system.
 
 ![Generate Block Design](IP-integrator.png)
 
-4. Implement the FPGA bitstream. Vivado will ask to synthesise and implement the design as well. This process creates a bitstream `.bit` file that configures the programmable logic on the FPGA
+6. Implement the FPGA bitstream. Vivado will ask to synthesise and implement the design as well. This process creates a bitstream `.bit` file that configures the programmable logic on the FPGA
 
 ![Generate Bitstream](generate-bitstream.png)
 
-5. Find the files and copy them to the user home directory (`/user/xilinx/`) on the Pynq. Rename them so the files have the same name (keep the `.hwh` and `.bit` extensions). I recommend adding a revision number that you increment each time so you can be sure you are running the latest implementation. You can copy files to the Pynq with `scp` or drag and drop when you have a terminal open in MobaXterm
+7. Find the output files and copy them to the user home directory /user/xilinx on the Pynq. Rename them so the files have the same name (keep the `.hwh` and `.bit` extensions). I recommend adding a revision number that you increment each time so you can be sure you are running the latest implementation. You can copy files to the Pynq with `scp` or drag and drop when you have a terminal open in MobaXterm
 
    1. The `.hwh` file is in `base.gen/sources_1/bd/base/hw_handoff`
    2. The `.bit` file is in `base.runs/impl_1`
+
+> [!NOTE]  
+> The build script copies the HDL source files from the src directory in the repository into the generated project structure. That means any changes to the files won't propagate to the FPGA design. Instead, you should edit the source files in the project structure - you can open them from the sources list in Vivado.
 
 ### Simulating the Image Generator
 
