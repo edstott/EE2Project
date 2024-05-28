@@ -92,6 +92,7 @@ Simulations are a popular option for visualisation demos, but they tend to be ha
 In Pynq, an overlay is a bitstream (programmable logic configuration) plus a Python library that interfaces with it. You will need to develop programmable logic but a Python library is optional because you can use the pre-existing base classes. A custom library for your overlay would make your code neater and more reusable.
 
 This repository contains two Jupyter notebooks to demonstrate the software side of Pynq overlays. Copy the notebooks to `/home/xilinx/jupyter_notebooks/` on the Pynq and load them in a browser at `http://<Pynq IP address>:9090`
+
 - [Software Image Generation](../maths-accelerator/software-image-generation.ipynb) works with the Pynq base overlay. It shows how you can create an image array and send it to the HDMI output
 - [Hardware Image Generation](../maths-accelerator/hardware-image-generation.ipynb) works with the project example overlay. It shows how to grab a frame from a hardware image generator and display it on the HDMI output
 #### Block Design
@@ -184,8 +185,9 @@ To summarise the `ready` and `valid` signals:
    1. Start Vivado 2023.2
    2. Go to Window→TCL Console
    3. In the console, type `cd <repository path>/maths-accelerator/overlay`. You will need to use a Unix-style path with `/` instead of `\`
+   4. Enter the command `./source build_ip.tcl`
    4. Enter the command `./source base.tcl`
-4. The script generates a Vivado project in \<repository path\>/maths-accelerator/overlay/base. Open it in Vivado
+4. The scripts compile some IP blocks and generate a Vivado project in \<repository path\>/maths-accelerator/overlay/base. Open it in Vivado
 5. Generate the block design with IP Integrator. This converts the block design to Verilog netlists and creates the hardware handoff file `.hwh` with information about the bus structure and address map for the operating system.
 
 ![Generate Block Design](IP-integrator.png)
