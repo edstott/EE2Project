@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module test_streamer(
+module pixel_generator(
 input           out_stream_aclk,
 input           s_axi_lite_aclk,
 input           axi_resetn,
@@ -63,10 +63,11 @@ localparam Y_SIZE = 480;
 localparam REG_FILE_SIZE = 8;
 parameter AXI_LITE_ADDR_WIDTH = 8;
 
-localparam AWAIT_WADD = 2'b00;
-localparam AWAIT_RESP = 2'b01;
-localparam AWAIT_WRITE = 2'b10;
-localparam AWAIT_WRITE_AND_RESP = 2'b11;
+localparam AWAIT_WADD_AND_DATA = 3'b000;
+localparam AWAIT_WDATA = 3'b001;
+localparam AWAIT_WADD = 3'b010;
+localparam AWAIT_WRITE = 3'b100;
+localparam AWAIT_RESP = 3'b101;
 
 localparam AWAIT_RADD = 2'b00;
 localparam AWAIT_FETCH = 2'b01;
@@ -75,19 +76,18 @@ localparam AWAIT_READ = 2'b10;
 localparam AXI_OK = 2'b00;
 localparam AXI_ERR = 2'b10;
 
-reg [31:0]                          regfile [REG_FILE_SIZE-1:0];
-reg [AXI_LITE_ADDR_WIDTH-1:0]       writeAddr = AWAIT_WADD;
-reg [AXI_LITE_ADDR_WIDTH-1:0]       readAddr = AWAIT_RADD;
-reg [31:0]                          readData;
-reg [1:0]                           readState, writeState;
-
+reg [31:0]                          regfile [REG_FILE_SIZE];
+reg [AXI_LITE_ADDR_WIDTH-3:0]       writeAddr, readAddr;
+reg [31:0]                          readData, writeData;
+reg [1:0]                           readState = AWAIT_RADD;
+reg [2:0]                           writeState = AWAIT_WADD_AND_DATA;
 
 //Read from the register file
 always @(posedge s_axi_lite_aclk) begin
     
     readData <= regfile[readAddr];
 
-    if (axi_resetn) begin
+    if (!axi_resetn) begin
     readState <= AWAIT_RADD;
     end
 
@@ -95,7 +95,7 @@ always @(posedge s_axi_lite_aclk) begin
 
         AWAIT_RADD: begin
             if (s_axi_lite_arvalid) begin
-                readAddr <= s_axi_lite_araddr;
+                readAddr <= s_axi_lite_araddr[7:2];
                 readState <= AWAIT_FETCH;
             end
         end
@@ -125,60 +125,67 @@ assign s_axi_lite_rdata = readData;
 //Write to the register file, use a state machine to track address write, data write and response read events
 always @(posedge s_axi_lite_aclk) begin
 
-    if (axi_resetn) begin
-        writeState <= AWAIT_WADD;
+    if (!axi_resetn) begin
+        writeState <= AWAIT_WADD_AND_DATA;
     end
 
     else case (writeState)
 
-        AWAIT_WADD: begin  //Idle, awaiting a write address
-            if (s_axi_lite_awvalid) begin
-                writeAddr <= s_axi_lite_awaddr;
-                writeState <= AWAIT_WRITE_AND_RESP;
-            end          
-        end
-
-        AWAIT_WRITE_AND_RESP: begin //Received address, waiting for write and response
-            case ({s_axi_lite_wvalid, s_axi_lite_bready})
+        AWAIT_WADD_AND_DATA: begin  //Idle, awaiting a write address or data
+            case ({s_axi_lite_awvalid, s_axi_lite_wvalid})
                 2'b10: begin
-                    regfile[writeAddr] <= s_axi_lite_wdata;
-                    writeState <= AWAIT_RESP;
+                    writeAddr <= s_axi_lite_awaddr[7:2];
+                    writeState <= AWAIT_WDATA;
                 end
                 2'b01: begin
-                    writeState <= AWAIT_WRITE;
-                end
-                2'b11: begin
-                    regfile[writeAddr] <= s_axi_lite_wdata;
+                    writeData <= s_axi_lite_wdata;
                     writeState <= AWAIT_WADD;
                 end
-                default: begin
-                    writeState <= writeState;
+                2'b11: begin
+                    writeData <= s_axi_lite_wdata;
+                    writeAddr <= s_axi_lite_awaddr[7:2];
+                    writeState <= AWAIT_WRITE;
                 end
-            endcase
+                default: begin
+                    writeState <= AWAIT_WADD_AND_DATA;
+                end
+            endcase        
         end
 
-        AWAIT_RESP: begin   //Write complete, awaiting response transmission
-            if (s_axi_lite_bready) begin
-                writeState <= AWAIT_WADD;
+        AWAIT_WDATA: begin //Received address, waiting for data
+            if (s_axi_lite_wvalid) begin
+                writeData <= s_axi_lite_wdata;
+                writeState <= AWAIT_WRITE;
             end
         end
 
-        AWAIT_WRITE: begin  //Response sent, awaiting write
-            if (s_axi_lite_wvalid) begin
-                    regfile[writeAddr] <= s_axi_lite_wdata;
-                    writeState <= AWAIT_WADD;
+        AWAIT_WADD: begin //Received data, waiting for address
+            if (s_axi_lite_awvalid) begin
+                writeData <= s_axi_lite_wdata;
+                writeState <= AWAIT_WRITE;
+            end
+        end
+
+        AWAIT_WRITE: begin //Perform the write
+            regfile[writeAddr] <= writeData;
+            writeState <= AWAIT_RESP;
+        end
+
+        AWAIT_RESP: begin //Wait to send response
+            if (s_axi_lite_bready) begin
+                writeState <= AWAIT_WADD_AND_DATA;
             end
         end
 
         default: begin
-            writeState <= AWAIT_WADD;
+            writeState <= AWAIT_WADD_AND_DATA;
         end
     endcase
 end
 
-assign s_axi_lite_awready = (writeState == AWAIT_WADD);
-assign s_axi_lite_wready = (writeState == AWAIT_WRITE || writeState == AWAIT_WRITE_AND_RESP);
-assign s_axi_lite_bvalid = (writeState == AWAIT_RESP || writeState == AWAIT_WRITE_AND_RESP);
+assign s_axi_lite_awready = (writeState == AWAIT_WADD_AND_DATA || writeState == AWAIT_WADD);
+assign s_axi_lite_wready = (writeState == AWAIT_WADD_AND_DATA || writeState == AWAIT_WDATA);
+assign s_axi_lite_bvalid = (writeState == AWAIT_RESP);
 assign s_axi_lite_bresp = (writeAddr < REG_FILE_SIZE) ? AXI_OK : AXI_ERR;
 
 

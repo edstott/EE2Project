@@ -97,25 +97,22 @@ This repository contains two Jupyter notebooks to demonstrate the software side 
 - [Hardware Image Generation](../maths-accelerator/hardware-image-generation.ipynb) works with the project example overlay. It shows how to grab a frame from a hardware image generator and display it on the HDMI output
 #### Block Design
 
-The [example design](https://imperiallondon-my.sharepoint.com/:u:/g/personal/estott_ic_ac_uk/ET92KD1aUgpNvWLN8UcPsKwBkc7whPVdenlb7QPyes7HkA?e=bQZwQQ) is based on the PYNQ base configuration with the addition of a block that generates a video test pattern.
+The example design is based on the PYNQ base configuration with the addition of a block that generates a video test pattern.
 That block is written in Verilog and connected to the rest of the system with the IP Integrator tool.
 The block has two main interfaces:
 
 1. An AXI Stream Output (Master - AMD still uses outdated master/slave terminology), which outputs the video data in raster order. A stream interface is just a bus (32-bits in this case) of data, with a valid signal to indicate each clock cycle when it has been updated. A ready signal acts as _backpressure_, which allows the receiver to pause transmission if it is not ready. A done signal indicates the end of a packet of data, which is a complete horizontal line in the case of video data.
-2. (To be implemented) An AXI-Lite Slave port, which allows the control registers of the block to appear as a memory-mapped peripheral. If the user (via Python code on the processor system) wants to change a parameter of the visualisation, they would write the parameter to a specific address on the memory bus. The bus logic of the CPU and IP integrator system ensures that writes to this address are directed to this logic block. When the design is compiled, the address map for the entire system is written to a file, which is then used to find the address for a peripheral when it is accessed by the user code. The AXI-Lite interface has slower data throughput than the streaming interface.
+2. An AXI-Lite Slave port, which allows the control registers of the block to appear as a memory-mapped peripheral. If the user (via Python code on the processor system) wants to change a parameter of the visualisation, they would write the parameter to a specific address on the memory bus. The bus logic of the CPU and IP integrator system ensures that writes to this address are directed to this logic block. When the design is compiled, the address map for the entire system is written to a file, which is then used to find the address for a peripheral when it is accessed by the user code. The AXI-Lite interface has slower data throughput than the streaming interface.
 
-![The example image generator](block-focus.png)
+![The example pixel generator](block-focus.png)
 
-The stream output from the block is connected to a Video DMA (direct memory access) IP Block. This block can write to the main memory system independently from the CPU. When a video frame is generated, the DMA writes the image to an array in memory, where it can be accessed by the CPU or read by another DMA block for output to the video device. DMA blocks are configured by the CPU core by a separate AXI-Lite interface but after that they move data around the system without further involvement, which is much quicker than using the CPU core to access every pixel.
+The stream output from the block is connected to a Video DMA (direct memory access) IP Block inside the Video sub-block. This block can write to the main memory system independently from the CPU. When a video frame is generated, the DMA writes the image to an array in memory, where it can be accessed by the CPU or read by another DMA block for output to the video device. DMA blocks are configured by the CPU core by a separate AXI-Lite interface but after that they move data around the system without further involvement, which is much quicker than using the CPU core to access every pixel.
 
-Since the example design is already working, you can implement your design just by adding your logic to the frame generator block. Make sure that it can still stream pixels out as required. The rest of the system will handle the rest. Modifying the design in the IP Intergator is not necessary, except in advanced cases.
+Since the example design is already working, you can implement your design by adding your logic to the frame generator block. Make sure that it can still stream pixels out as required. The rest of the system will handle the rest. Modifying the design in the IP Intergator is not necessary, except in advanced cases.
 
 #### The Example Image Generator
 
-The HDL for the example image generator is in `test_streamer.v`. You can open it in the Sources list of Vivado
-
-![Source file for test_streamer](sources.png)
-
+The HDL for the example image generator is in `overlay/ip/pixel_generator.v`.
 The file uses a very simple combination of the x and y coordinates to generate each pixel:
 
 ```verilog
@@ -203,6 +200,17 @@ To summarise the `ready` and `valid` signals:
 
 > [!NOTE]  
 > The build script copies the HDL source files from the src directory in the repository into the generated project structure. That means any changes to the files won't propagate to the FPGA design. Instead, you should edit the source files in the project structure - you can open them from the sources list in Vivado.
+
+### Rebuilding the Pixel Generator IP
+
+The image generator example is packaged as an IP block, which allows the Pynq Python to discover its memory-mapped input/output (MMIO) interface and enable simple communication between software and hardware. When you edit the Verilog for the pixel generator, you need to repackage this IP block and then update your design. Changing the source file alone won't propagate your changes to the overlay compilation. Follow these steps to repackage the IP:
+
+1. The Pixel Generator IP is packaged in its own Vivado project and you'll need to create this project the first time you want to make an edit. Right-click on the Pixel Generator in the block diagram and choose "Edit in IP Packager". A box appears asking for a name and location for the new project. This can be anywhere except inside the IP library, so `<repository path>/maths-accelerator/overlay/pixel_generator_project/` will do. Open the new project in Vivado.
+2. The project will be populated with the two source files pixel_generator.v and packer.v, located in `<repository path>/maths-accelerator/overlay/ip/pixel_generator_1.0`. You can edit the files and add your own to the project. Place any new files in the same directory as the existing source files.
+3. Click "Edit Packaged IP" in the Flow Navigator. This opens the Package IP window. Go to "Review and Package" and click "Re-Package IP"
+4. Now the IP needs to be updated in the main project. Switch to that window and open the project settings. Go to "IP Repository" and click "Refresh All". You can also do this by entering the TCL command `update_ip_catalog -rebuild`
+5. You will now see a warning at the top of the Block Design window that says an IP upgrade is available. Click "Show IP Status", then in the IP Status Log click "Upgrade All". You can also run the TCL command `upgrade_ip -vlnv xilinx.com:user:pixel_generator:1.0 [get_ips  base_pixel_generator_0_0]`
+6. The upgrade launches an IP rebuild process. After that you can generate the bitstream and run it on the Pynq.
 
 ### Simulating the Image Generator
 

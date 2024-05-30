@@ -1,3 +1,8 @@
 maths-accelerator/overlay/base
 maths-accelerator/overlay/NA/ps7_summary.html
 *.log
+*.o
+*.vcd
+/maths-accelerator/overlay/pixel_generator_v1_0_project
+maths-accelerator/overlay/base_generated.tcl
+*.dmp
