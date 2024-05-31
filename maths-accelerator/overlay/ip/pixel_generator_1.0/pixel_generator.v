@@ -60,8 +60,9 @@ input           s_axi_lite_wvalid
 
 localparam X_SIZE = 640;
 localparam Y_SIZE = 480;
-localparam REG_FILE_SIZE = 8;
-parameter AXI_LITE_ADDR_WIDTH = 8;
+parameter  REG_FILE_SIZE = 8;
+localparam REG_FILE_AWIDTH = $clog2(REG_FILE_SIZE);
+parameter  AXI_LITE_ADDR_WIDTH = 8;
 
 localparam AWAIT_WADD_AND_DATA = 3'b000;
 localparam AWAIT_WDATA = 3'b001;
@@ -76,8 +77,8 @@ localparam AWAIT_READ = 2'b10;
 localparam AXI_OK = 2'b00;
 localparam AXI_ERR = 2'b10;
 
-    reg [31:0]                          regfile [REG_FILE_SIZE-1:0];
-reg [AXI_LITE_ADDR_WIDTH-3:0]       writeAddr, readAddr;
+reg [31:0]                          regfile [REG_FILE_SIZE-1:0];
+reg [REG_FILE_AWIDTH-1:0]           writeAddr, readAddr;
 reg [31:0]                          readData, writeData;
 reg [1:0]                           readState = AWAIT_RADD;
 reg [2:0]                           writeState = AWAIT_WADD_AND_DATA;
@@ -95,7 +96,7 @@ always @(posedge s_axi_lite_aclk) begin
 
         AWAIT_RADD: begin
             if (s_axi_lite_arvalid) begin
-                readAddr <= s_axi_lite_araddr[7:2];
+                readAddr <= s_axi_lite_araddr[2+:REG_FILE_AWIDTH];
                 readState <= AWAIT_FETCH;
             end
         end
@@ -134,7 +135,7 @@ always @(posedge s_axi_lite_aclk) begin
         AWAIT_WADD_AND_DATA: begin  //Idle, awaiting a write address or data
             case ({s_axi_lite_awvalid, s_axi_lite_wvalid})
                 2'b10: begin
-                    writeAddr <= s_axi_lite_awaddr[7:2];
+                    writeAddr <= s_axi_lite_awaddr[2+:REG_FILE_AWIDTH];
                     writeState <= AWAIT_WDATA;
                 end
                 2'b01: begin
@@ -143,7 +144,7 @@ always @(posedge s_axi_lite_aclk) begin
                 end
                 2'b11: begin
                     writeData <= s_axi_lite_wdata;
-                    writeAddr <= s_axi_lite_awaddr[7:2];
+                    writeAddr <= s_axi_lite_awaddr[2+:REG_FILE_AWIDTH];
                     writeState <= AWAIT_WRITE;
                 end
                 default: begin
@@ -161,7 +162,7 @@ always @(posedge s_axi_lite_aclk) begin
 
         AWAIT_WADD: begin //Received data, waiting for address
             if (s_axi_lite_awvalid) begin
-                writeData <= s_axi_lite_wdata;
+                writeAddr <= s_axi_lite_awaddr[2+:REG_FILE_AWIDTH];
                 writeState <= AWAIT_WRITE;
             end
         end
@@ -192,10 +193,13 @@ assign s_axi_lite_bresp = (writeAddr < REG_FILE_SIZE) ? AXI_OK : AXI_ERR;
 
 reg [9:0] x;
 reg [8:0] y;
+reg [7:0] frame;
 
 wire first = (x == 0) & (y==0);
 wire lastx = (x == X_SIZE - 1);
 wire lasty = (y == Y_SIZE - 1);
+wire frame_adv = regfile[0][7:0];
+wire ready;
 
 always @(posedge out_stream_aclk) begin
     if (periph_resetn) begin
@@ -204,6 +208,7 @@ always @(posedge out_stream_aclk) begin
                 x <= 9'd0;
                 if (lasty) begin
                     y <= 9'd0;
+                    frame <= frame + frame_adv;
                 end
                 else begin
                     y <= y + 9'd1;
@@ -215,15 +220,16 @@ always @(posedge out_stream_aclk) begin
     else begin
         x <= 0;
         y <= 0;
+        frame <= 0;
     end
 end
 
 wire valid_int = 1'b1;
 
 wire [7:0] r, g, b;
-assign r = x[7:0];
-assign g = y[7:0];
-assign b = x[6:0]+y[6:0];
+assign r = x[7:0] + frame;
+assign g = y[7:0] + frame;
+assign b = x[6:0]+y[6:0] + frame;
 
 packer pixel_packer(    .aclk(out_stream_aclk),
                         .aresetn(periph_resetn),
