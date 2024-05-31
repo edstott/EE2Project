@@ -176,14 +176,14 @@ To summarise the `ready` and `valid` signals:
 
 ### Building the Starter Project
 
-1. Install [Vivado 2023.2](https://www.xilinx.com/support/download.html)
-2. Clone this repository onto your computer
+1. Install [Vivado 2023.2](https://www.xilinx.com/support/download.html) or [open a session on the departmental server](server-vivado.md).
+2. Clone this repository onto the computer
 3. Run the build script that generates the project
    1. Start Vivado 2023.2
    2. Go to Window→TCL Console
    3. In the console, type `cd <repository path>/maths-accelerator/overlay`. You will need to use a Unix-style path with `/` instead of `\`
    4. Enter the command `source build_ip.tcl`
-   4. Enter the command `source base.tcl`
+   5. Enter the command `source base.tcl`
 4. The scripts compile some IP blocks and generate a Vivado project in \<repository path\>/maths-accelerator/overlay/base. Open it in Vivado
 5. Generate the block design with IP Integrator. This converts the block design to Verilog netlists and creates the hardware handoff file `.hwh` with information about the bus structure and address map for the operating system.
 
