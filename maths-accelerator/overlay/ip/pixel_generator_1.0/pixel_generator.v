@@ -161,7 +161,7 @@ always @(posedge s_axi_lite_aclk) begin
 
         AWAIT_WADD: begin //Received data, waiting for address
             if (s_axi_lite_awvalid) begin
-                writeData <= s_axi_lite_wdata;
+                writeAddr <= s_axi_lite_awaddr[2+:REG_FILE_AWIDTH];
                 writeState <= AWAIT_WRITE;
             end
         end
