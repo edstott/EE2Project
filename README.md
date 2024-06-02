@@ -36,10 +36,10 @@ Finally, every project will draw upon various non-technical skill areas, includi
 
 | Area of assessment    | Weighting | High mark | Medium mark | Low mark |
 | ------------------    |:---------:| ------------------ | ------------------ | ------------------ |
-| Requirements Capture  | 15/100    | • Original requirements expanded into project-specific requirements <br> • Quantitative specifications given where appropriate <br> • Requirements for subsystems | • Project requirements are expanded and customised | • Project aims are given, but there is some ambiguity |
+| Requirements Capture  | 20/100    | • Original requirements expanded into project-specific requirements <br> • Quantitative specifications given where appropriate <br> • Requirements for subsystems | • Project requirements are expanded and customised | • Project aims are given, but there is some ambiguity |
 | System Design         | 30/100    | • Strong reasoning for system design decisions <br> • All blocks and interfaces defined |  • Core elements of the system are defined <br> • The system design is mostly plausible | • Some important blocks or interfaces in the system are undefined <br> • Unreasonable assumptions about how parts of the design will work  |
 | System Implementation | 30/100    | • Evidence that all system interfaces are implemented, using emulation or placeholder data where necessary <br> • Some implementation of functionality in each subsytem <br> • Some infrastructure is in place for evaluation | • Some progress on subsystem implementation <br> • Some progress on system interfaces allowing interaction of some subsystems | • Some sub-system implementation but little attempt at system integration |
-| Project Management    | 15/100     | • All group member roles are defined<br> • Risks and contingencies identified<br> • Significant contribution of each group member <br> • Project management framework adopted | • Clear division of work between group members | • Roles of group members are unclear |
+| Project Management    | 20/100     | • All group member roles are defined<br> • Risks and contingencies identified<br> • Significant contribution of each group member <br> • Project management framework adopted | • Clear division of work between group members | • Roles of group members are unclear |
 
 ### Report
 
