@@ -374,7 +374,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>67130dbc</spirit:value>
+            <spirit:value>04a23171</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -390,7 +390,7 @@
         <spirit:parameters>
           <spirit:parameter>
             <spirit:name>viewChecksum</spirit:name>
-            <spirit:value>67130dbc</spirit:value>
+            <spirit:value>04a23171</spirit:value>
           </spirit:parameter>
         </spirit:parameters>
       </spirit:view>
@@ -837,7 +837,7 @@
       <spirit:file>
         <spirit:name>pixel_generator.v</spirit:name>
         <spirit:fileType>verilogSource</spirit:fileType>
-        <spirit:userFileType>CHECKSUM_bcf3309e</spirit:userFileType>
+        <spirit:userFileType>CHECKSUM_f58909e2</spirit:userFileType>
       </spirit:file>
     </spirit:fileSet>
     <spirit:fileSet>
@@ -885,8 +885,8 @@
       </xilinx:taxonomies>
       <xilinx:displayName>pixel_generator_v1_0</xilinx:displayName>
       <xilinx:definitionSource>package_project</xilinx:definitionSource>
-      <xilinx:coreRevision>14</xilinx:coreRevision>
-      <xilinx:coreCreationDateTime>2024-05-31T14:24:58Z</xilinx:coreCreationDateTime>
+      <xilinx:coreRevision>16</xilinx:coreRevision>
+      <xilinx:coreCreationDateTime>2024-06-03T10:55:39Z</xilinx:coreCreationDateTime>
       <xilinx:tags>
         <xilinx:tag xilinx:name="nopcore"/>
       </xilinx:tags>
@@ -895,7 +895,7 @@
       <xilinx:xilinxVersion>2023.2</xilinx:xilinxVersion>
       <xilinx:checksum xilinx:scope="busInterfaces" xilinx:value="328a68dd"/>
       <xilinx:checksum xilinx:scope="memoryMaps" xilinx:value="e91c27f1"/>
-      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="2c0a2320"/>
+      <xilinx:checksum xilinx:scope="fileGroups" xilinx:value="c7d9c168"/>
       <xilinx:checksum xilinx:scope="ports" xilinx:value="89e83ce9"/>
       <xilinx:checksum xilinx:scope="hdlParameters" xilinx:value="c3313698"/>
       <xilinx:checksum xilinx:scope="parameters" xilinx:value="6885b715"/>
