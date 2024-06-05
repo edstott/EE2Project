@@ -1,21 +1,37 @@
 `timescale 1ns / 1ps
 module pixgen_tb;
 
-    parameter ALWAYS_READY = 1;
-    parameter READY_AWAIT_VALID = 1;
-    parameter TIMEOUT = 1000;
-    parameter X_SIZE = 480;
-    parameter Y_SIZE = 480;
-    parameter ENDTIME = 10000;
+    //Ready signal generation
+    localparam ALWAYS_READY = 1;        //Ready signal is always true
+    localparam RANDOM_READY = 2;        //Ready signal is true 50% of the time according to pseudo-random sequence
+    localparam READY_AFTER_VALID = 3;   //Ready signal goes true after valid is true, then goes false
+    
+    parameter READY_MODE = RANDOM_READY;
 
+
+    parameter TIMEOUT = 1000;           //Time to wait for valid to be true
+    parameter X_SIZE = 480;             //X dimension of image in words (words = pixels * 3/4)
+    parameter Y_SIZE = 480;             //Y dimension of image
+    parameter ENDTIME = 10000000;       //End time of simulation
+    parameter RND_SEED = 1246504138;    //Random seed for ready signal generation
+    
+    //Simulation configuration
+    initial begin
+        $dumpfile("test.vcd");
+        $dumpvars(0,pixgen_tb);
+        #ENDTIME $finish;
+    end
+
+    //Generate the clock input
     reg clk = 0;
     always #5 clk = !clk;
+
+    //Generate the ready input
     reg rst = 0;
     initial #16 rst = 1;
 
-    reg ready = ALWAYS_READY;
+    //Instantiate the pixel generator
     wire valid, sof, eol;
-
     pixel_generator p1 (
         .out_stream_aclk(clk),
         .s_axi_lite_aclk(clk),
@@ -52,40 +68,97 @@ module pixgen_tb;
         .s_axi_lite_wready(),
         .s_axi_lite_wvalid(1'b0));
 
+
+    //Ready signal generation
+    reg [32:0] prbs = RND_SEED;
+    reg ready = 1'b0;
+
+    always @(posedge clk) begin
+        prbs <= {prbs[31:0], prbs[32] ^ !prbs[19]};
+
+        case (READY_MODE)
+            ALWAYS_READY: begin
+                ready <= 1'b1;
+            end
+
+            RANDOM_READY: begin
+                ready <= prbs[32];
+            end
+
+            READY_AFTER_VALID: begin
+                if (valid && ready) begin
+                    ready <= 1'b0;
+                end
+                else if (valid) begin
+                    ready <= 1'b1;
+                end
+                else begin
+                    ready <= 1'b0;
+                end
+            end
+
+        endcase
+
+    end
+    
+    //Output word counting
     integer xCount = 0;
     integer yCount = 0;
+    integer frameCount = 0;
     integer checkpoint = 0;
 
-    initial begin
-        $dumpfile("test.vcd");
-        $dumpvars(0,pixgen_tb);
+    always @(posedge clk) begin
 
-        #15;
-        while (1) begin
+        //Check for timeout waiting for valid
+        if (valid) checkpoint = $time;
+        if ($time > checkpoint + TIMEOUT) begin
+            $display("Error: Timeout waiting for valid");
             checkpoint = $time;
-            while (!valid) begin
-                #10;
-                if ($time > checkpoint + TIMEOUT) $error("Timeout waiting for valid");
-            end
-
-            if (xCount == 0 && yCount == 0) begin
-                if (sof) $display("SOF OK");
-                else $error("No sof(tuser) on first word of line"); 
-            end
-
-            if (xCount == X_SIZE - 1) begin
-                if (eol) $display("EOL Ok");
-                else $error("No eol(tlast on last word of line)"); 
-            end
-
-            xCount = (xCount + 1) % X_SIZE;
-            if (xCount == 0) yCount = yCount + 1 % Y_SIZE;
-
-            if ($time > ENDTIME) $finish;
-            
-            #10;
         end
 
+        if (valid && ready) begin
+            
+            //Check for Start of Frame (tuser in AXI Stream) on first word of each frame
+            if (xCount == 0 && (yCount % Y_SIZE) == 0) begin
+                if (sof) begin
+                    $display("SOF Ok on frame %0d",frameCount);
+                    yCount = 0;
+                    frameCount = frameCount + 1;
+                end
+                else begin
+                    $display("Error: No SOF following line %0d of frame %0d", Y_SIZE - 1, frameCount); 
+                end
+            end
+            else if (sof) begin
+                $display("Error: SOF received on word %0d of line %0d of frame %0d", xCount, yCount, frameCount);
+                xCount = 0;
+                yCount = 0;
+                frameCount = frameCount + 1;
+            end
+
+            //Check for End of Line (tlast in AXI Stream) on last word of each line
+            if (xCount == X_SIZE - 1) begin
+                if (eol) begin
+                    $display("EOL Ok on line %0d", yCount);
+                    xCount = 0;
+                    yCount = yCount + 1;
+                end
+                else begin
+                    $display("Error: No EOL on word %0d of line %0d", X_SIZE - 1, yCount);
+                    xCount = xCount + 1; 
+                end
+            end
+            else if (eol) begin
+                $display("Error: EOL received on word %0d of line %0d", xCount, yCount);
+                xCount = 0;
+                yCount = yCount + 1;
+            end
+            else begin
+                xCount = xCount + 1;
+            end
+
+        end
+        
 
     end
 
