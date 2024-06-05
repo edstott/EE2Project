@@ -7,3 +7,4 @@ maths-accelerator/overlay/NA/ps7_summary.html
 maths-accelerator/overlay/base_generated.tcl
 *.dmp
 /maths-accelerator/overlay/.Xil
+*.out
