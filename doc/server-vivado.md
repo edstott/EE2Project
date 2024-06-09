@@ -9,7 +9,7 @@
 ### Windows
 
   1. Install [MobaXterm software](https://mobaxterm.mobatek.net/)
-  2. ICT are in the process of changing how remote access works. If you are not connected to the College network you can try [Unified Access](https://www.imperial.ac.uk/admin-services/ict/self-service/connect-communicate/remote-access/unified-access/) or [VPN](https://www.imperial.ac.uk/admin-services/ict/self-service/connect-communicate/remote-access/virtual-private-network-vpn/).
+  2. ICT are in the process of changing how remote access works. If you are not connected to the College network you can try [Unified Access](https://www.imperial.ac.uk/admin-services/ict/self-service/connect-communicate/remote-access/unified-access/) or [VPN](https://www.imperial.ac.uk/admin-services/ict/self-service/connect-communicate/remote-access/virtual-private-network-vpn/). You can also access the server from a [virtual desktop](https://client.wvd.microsoft.com/arm/webclient/index.html) - open MobaXterm using the AppsAnywhere page.
   3. Run MobaXterm and start a new session
   4. Choose SSH, enter the hostname `ee-mill1.ee.ic.ac.uk` and your College username
   5. Click OK and enter your College password when prompted
