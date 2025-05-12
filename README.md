@@ -49,7 +49,7 @@ Finally, every project will draw upon various non-technical skill areas, includi
 | Area of assessment    | Weighting | High mark | Medium mark | Low mark |
 | ------------------    |:---------:| --------- | ----------- | -------- |
 | Design Process        | 20/100    | • Logical progression of design from top-level requirements to detailed implementation and evaluation<br> • Discussion of all important design decisions with quantitative and qualitative evidence <br> • Interesting discussion of project planning and organisation | •  Requirements in place for most of the functionality of the system<br> • Discussion of design decisions, but some unclear reasoning and/or unimportant details <br> • Full breakdown of task allocation to group members | • Some elaboration of requirements beyond original points in project brief<br> • Some discussion of design decisions, but important aspects given trivial or no reasoning |
-| Implementation        | 55/100    | • Design is a technically complex system of interacting components<br> • Advanced techniques and skills are applied, requiring research beyond module content | • Design is a mostly-functional system, maybe some elements are not integrated <br>• Design makes good use of EEE/EIE module content<br> | • Elements of the project are designed, but the project is not functional as a complete system <br> • Some design elements are technically plausible
+| Implementation        | 60/100    | • Design is a technically complex system of interacting components<br> • Advanced techniques and skills are applied, requiring research beyond module content | • Design is a mostly-functional system, maybe some elements are not integrated <br>• Design makes good use of EEE/EIE module content<br> | • Elements of the project are designed, but the project is not functional as a complete system <br> • Some design elements are technically plausible
 | Evaluation            | 20/100    | • Evidence that tests all requirements<br> • Evaluation of top-level system and individual subsystems <br> • Appropriate tests and metrics devised<br> • Informative visual presentation of data | • Evaluation of most requirements<br> • Use of quantitative and qualitative data | • Some elements of the design are evaluated, but some important aspects are omitted <br> • Low-quality evidence of design outcome
 | Reflection            | 5/100     | • Individual reflection answers all the questions |  | • Individual reflection does not answer all the questions |
 
@@ -66,6 +66,18 @@ Finally, every project will draw upon various non-technical skill areas, includi
 
 > [!NOTE]  
 > Information from the demo may be used to adjust the report mark. For example, this could arise where claims in the report do not match evidence from the demo, or the report did not give a true sense of the complexity of a project element
+
+### Individual Reflection
+
+| Weighting of presentation in module mark: | You must pass each component |
+| ----------------------------------------- | ------ |
+
+| Area of assessment    | Pass |
+| ----------------------------------------- | ------ |
+| Security | Adopt a holistic and proportionate approach to the mitigation of security risks |
+| EDI | Adopt an inclusive approach to engineering practice and recognise the responsibilities, benefits and importance of supporting equality, diversity and inclusion |
+| Teamwork | Function effectively as an individual, and as a member or leader of a team. Evaluate effectiveness of own and team performance |
+| Lifelong learning | Plan and record self-learning and development as the foundation for lifelong learning/CPD |
 
 ## Project Options
 
