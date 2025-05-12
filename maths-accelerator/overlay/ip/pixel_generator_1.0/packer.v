@@ -45,6 +45,11 @@ always @(posedge aclk)begin
                 else begin
                     state_reg <= state + 2'b1;
                 end
+                
+                //Latch colour inputs
+                last_r <= r;
+                last_g <= g;
+                last_b <= b;
             end
 
             // Store the sof flag when it is set (it can't be read in this cycle because output data isn't ready)
@@ -55,11 +60,6 @@ always @(posedge aclk)begin
             else if (valid & out_stream_tready) begin
                 sof_reg <= 1'b0;
             end
-
-            //Latch colour inputs whenever they are valid
-            last_r <= r;
-            last_g <= g;
-            last_b <= b;
 
         end
     end

@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 module pixgen_tb;
 
-    //Ready signal generation
+    //Ready signal mode
     localparam ALWAYS_READY = 1;        //Ready signal is always true
     localparam RANDOM_READY = 2;        //Ready signal is true 50% of the time according to pseudo-random sequence
     localparam READY_AFTER_VALID = 3;   //Ready signal goes true after valid is true, then goes false
@@ -26,7 +26,7 @@ module pixgen_tb;
     reg clk = 0;
     always #5 clk = !clk;
 
-    //Generate the ready input
+    //Generate the reset input
     reg rst = 0;
     initial #16 rst = 1;
 
@@ -126,11 +126,11 @@ module pixgen_tb;
                     frameCount = frameCount + 1;
                 end
                 else begin
-                    $display("Error: No SOF following line %0d of frame %0d", Y_SIZE - 1, frameCount); 
+                    $display("Error: Expected SOF but not received"); 
                 end
             end
             else if (sof) begin
-                $display("Error: SOF received on word %0d of line %0d of frame %0d", xCount, yCount, frameCount);
+                $display("Error: Unexpected SOF received on word %0d of line %0d of frame %0d", xCount, yCount, frameCount);
                 xCount = 0;
                 yCount = 0;
                 frameCount = frameCount + 1;
@@ -149,7 +149,7 @@ module pixgen_tb;
                 end
             end
             else if (eol) begin
-                $display("Error: EOL received on word %0d of line %0d", xCount, yCount);
+                $display("Error: Unexpected EOL received on word %0d of line %0d", xCount, yCount);
                 xCount = 0;
                 yCount = yCount + 1;
             end

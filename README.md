@@ -45,6 +45,7 @@ Finally, every project will draw upon various non-technical skill areas, includi
  
 | Weighting of report in module mark | 50/100 |
 | ----------------------------------------- | ------ |
+| **Word Limit**                          | **10000**  |
 
 | Area of assessment    | Weighting | High mark | Medium mark | Low mark |
 | ------------------    |:---------:| --------- | ----------- | -------- |
