@@ -2,17 +2,15 @@
 
 ## Outline
 
-The Electronics Design Project is a EEE2 and EIE2 module that runs in the Summer Term. It begins with a breifing, which follows the final written exam in May, and it ends with a demo and interview assessment near the end of the term. Students work in groups of six to design and implement a system that meets some high-level objectives. There is a choice of three topics for the project.
+The Electronics Design Project is a EEE2 and EIE2 module that runs in the Summer Term. It begins with a breifing, which follows the final written exam in May, and it ends with a demo and interview assessment near the end of the term. Students work in groups to design and implement a system that meets some high-level objectives. There is a choice of three topics for the project.
 
 Most of the study time for the project is self-organised. You will need to plan your work from requirement elaboration and design decision exploration through to system integration and documentation. A series of talks is organised to help you with non-technical aspects.
 
 ### Project Groups
 
 Project groups may be self-selected.
-Your group must contain at least two students from the EEE programme and two from the EIE programme.
-You may register a group of four, five or six members, but if you register fewer than six members it is possible that others will be added to your group.
-It is also possible that groups of four will be broken up if there is no-one available to join the group.
-There may be some groups of five due to division of the cohort.
+Your group must contain at least one student from the EEE programme and two from the EIE programme.
+You may register a group of four or five members, but it is possible that others will be added to ensure everyone has a group.
 
 Each project option can only support a limited number of groups, so you will need to rank your option preferences.
 If an option is oversubscribed for first preferences, then some groups will be allocated to their second choice.
