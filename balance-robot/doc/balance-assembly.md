@@ -4,7 +4,7 @@
 
 Refer to the [interactive model](https://a360.co/4dLysZu) to help you assemble the base chassis.
 Try using the 'Explode Model' and 'Model Browser' features on the toolbar to see get different views of the assembly.
-The model browser allows you to highlight or hide the various components referred to in the instructions below
+The model browser allows you to highlight the various components referred to in the instructions below
 
 ![Interactive model viewer](robot-model.png)
 

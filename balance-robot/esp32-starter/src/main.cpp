@@ -1,28 +1,36 @@
 #include <Arduino.h>
+#include <SPI.h>
 #include <TimerInterrupt_Generic.h>
 #include <Adafruit_MPU6050.h>
 #include <Adafruit_Sensor.h>
 #include <step.h>
 
 // The Stepper pins
-#define STEPPER1_DIR_PIN 16   //Arduino D9
-#define STEPPER1_STEP_PIN 17  //Arduino D8
-#define STEPPER2_DIR_PIN 4    //Arduino D11
-#define STEPPER2_STEP_PIN 14  //Arduino D10
-#define STEPPER_EN 15         //Arduino D12
+const int STEPPER1_DIR_PIN  = 16;
+const int STEPPER1_STEP_PIN = 17;
+const int STEPPER2_DIR_PIN  = 4;
+const int STEPPER2_STEP_PIN = 14;
+const int STEPPER_EN_PIN    = 15; 
+
+//ADC pins
+const int ADC_CS_PIN        = 5;
+const int ADC_SCK_PIN       = 18;
+const int ADC_MISO_PIN      = 19;
+const int ADC_MOSI_PIN      = 23;
 
 // Diagnostic pin for oscilloscope
-#define TOGGLE_PIN  32        //Arduino A4
+const int TOGGLE_PIN        = 32;
 
-const int PRINT_INTERVAL = 500;
-const int LOOP_INTERVAL = 10;
-const int  STEPPER_INTERVAL_US = 20;
+const int PRINT_INTERVAL    = 500;
+const int LOOP_INTERVAL     = 10;
+const int STEPPER_INTERVAL_US = 20;
 
 const float kx = 20.0;
+const float VREF = 4.096;
 
 //Global objects
 ESP32Timer ITimer(3);
-Adafruit_MPU6050 mpu;         //Default pins for I2C are SCL: IO22/Arduino D3, SDA: IO21/Arduino D4
+Adafruit_MPU6050 mpu;         //Default pins for I2C are SCL: IO22, SDA: IO21
 
 step step1(STEPPER_INTERVAL_US,STEPPER1_STEP_PIN,STEPPER1_DIR_PIN );
 step step2(STEPPER_INTERVAL_US,STEPPER2_STEP_PIN,STEPPER2_DIR_PIN );
@@ -42,6 +50,22 @@ bool TimerHandler(void * timerNo)
   digitalWrite(TOGGLE_PIN,toggle);  
   toggle = !toggle;
 	return true;
+}
+
+uint16_t readADC(uint8_t channel) {
+  uint8_t TX0 = 0x06 | (channel >> 2);  // Command Byte 0 = Start bit + single-ended mode + MSB of channel
+  uint8_t TX1 = (channel & 0x03) << 6;  // Command Byte 1 = Remaining 2 bits of channel
+
+  digitalWrite(ADC_CS_PIN, LOW); 
+
+  SPI.transfer(TX0);                    // Send Command Byte 0
+  uint8_t RX0 = SPI.transfer(TX1);      // Send Command Byte 1 and receive high byte of result
+  uint8_t RX1 = SPI.transfer(0x00);     // Send dummy byte and receive low byte of result
+
+  digitalWrite(ADC_CS_PIN, HIGH); 
+
+  uint16_t result = ((RX0 & 0x0F) << 8) | RX1; // Combine high and low byte into 12-bit result
+  return result;
 }
 
 void setup()
@@ -74,8 +98,13 @@ void setup()
   step2.setAccelerationRad(10.0);
 
   //Enable the stepper motor drivers
-  pinMode(STEPPER_EN,OUTPUT);
-  digitalWrite(STEPPER_EN, false);
+  pinMode(STEPPER_EN_PIN,OUTPUT);
+  digitalWrite(STEPPER_EN_PIN, false);
+
+  //Set up ADC and SPI
+  pinMode(ADC_CS_PIN, OUTPUT);
+  digitalWrite(ADC_CS_PIN, HIGH);
+  SPI.begin(ADC_SCK_PIN, ADC_MISO_PIN, ADC_MOSI_PIN, ADC_CS_PIN);
 
 }
 
@@ -89,7 +118,7 @@ void loop()
   //Run the control loop every LOOP_INTERVAL ms
   if (millis() > loopTimer) {
     loopTimer += LOOP_INTERVAL;
-
+    
     // Fetch data from MPU6050
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
@@ -104,11 +133,14 @@ void loop()
   }
   
   //Print updates every PRINT_INTERVAL ms
+  //Line format: X-axis tilt, Motor speed, A0 Voltage
   if (millis() > printTimer) {
     printTimer += PRINT_INTERVAL;
     Serial.print(tiltx*1000);
     Serial.print(' ');
     Serial.print(step1.getSpeedRad());
+    Serial.print(' ');
+    Serial.print((readADC(0) * VREF)/4095.0);
     Serial.println();
   }
 }

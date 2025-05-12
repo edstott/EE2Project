@@ -25,7 +25,7 @@ Your starter kit contains:
 | 2    | Breadboard |
 | 2    | Accelerometer/Gyroscope Module (MPU)|
 | 3    | Wiring Ribbon |
-| 2    | Battery Bypass Cable |
+| 2    | External PSU and battery bypass Cable |
 | 4    | USB Cable |
 
 ### Software
@@ -37,7 +37,7 @@ Starter code is provided for the ESP32 MCU to demonstrate stepper motor control 
 Try the following steps to get started with the project:
 
 1. Research and evaluate options for the demonstration task. Assess the capabilities of sensors and libraries that might be useful.
-2. Assemble the chassis by following the [assembly instructions](balance-assembly.md)
+2. Assemble the chassis by following the [assembly instructions](doc/balance-assembly.md)
 3. Download, compile and run the example code for the ESP32, which runs the motors. Use this code as a base for both balancing and non-balancing development streams.
 4. Begin to construct the communication system for your robot. Aim for an initial milestone which allows you to command simple movements with the chain Web UI → server/database → Raspberry Pi → ESP32
 
@@ -62,6 +62,7 @@ The batteries connect directly to the power PCB with the provided connectors.
 > - Use only the provided batteries. Do not use batteries you already own or buy your own batteries
 > - Bring batteries to the lab technicians when they are depleted for exchange with charged batteries. Do not recharge the batteries.
 > - Use the provided power PCB. Do not build your own circuit for battery input or modify the PCB.
+> - Use the included PSU as an alternative power source so you can continue work if your batteries are depleted.
 
 ### Robot Function
 
@@ -77,14 +78,14 @@ An arena is available for your use, and you can configure it with markings and/o
 A typical arena task might be to follow a line, navigate a maze or map the positions of objects.
 You can use lighting to help, in the form of flexible LED strips, glowing beacons and overhead lamps.
 
-![An artificial environment for robot problem solving](maze-robot.jpg)
+![An artificial environment for robot problem solving](doc/maze-robot.jpg)
 
 A robot operating in real-world environments will need to cope with greater uncertainty, and it may encounter moving objects, uneven surfaces and challenging lighting conditions.
 Typical tasks for robots in this environment could be meet-and-greet/personal assistance, search and rescue and domestic help.
 Think about how you can constrain the problem so you can develop functionality incrementally.
 A robot in a real-world environment may be reliant on third-party vision libraries, so make sure you understand the capabilities and limits of any candidate libraries before you commit yourself to achieving a particular goal.
 
-![A meet and greet robot at The Smithsonian Museum](Pepper-Portrait-1477x1920.jpg)
+![A meet and greet robot at The Smithsonian Museum](doc/Pepper-Portrait-1477x1920.jpg)
 
 Make use of consultation sessions with staff to refine and develop your ideas.
 
@@ -102,14 +103,14 @@ Modelling the balancing algorithm is encouraged, but often the best way to tune 
 In general, if the robot runs away and falls over, then more proportional gain is needed to provide a greater restoring force.
 If the robot oscillates before falling over, then proportional gain should be decreased or differential gain increased to introduce damping and remove overshoot.
 
-![Force diagram of robot](robot-balance.png)
+![Force diagram of robot](doc/robot-balance.png)
 
 The setpoint tilt angle might not be exactly zero due to an offset of the centre of mass of the robot from the central axis use to measure tilt.
 There can also be misalignment between the tilt sensor and the axis.
 You can find out this offset by turning the motors off and finding the tilt angle measured when the robot naturally balances as you gently hold it upright.
 Finding the right setpoint for a static condition can avoid needing to use an integral term in the controller because there is no steady-state error when the robot is perfectly balanced.
 
-![Diagram of a generic PID](PID_en.png)
+![Diagram of a generic PID](doc/PID_en.png)
 
 Once the robot can balance in a static position, the next task is to make it move around.
 One way to do this is to use a cascaded controller, which means that the setpoint for the inner loop (desired tilt angle in this case) is itself set by a PID controller.
@@ -124,9 +125,10 @@ That way, the robot will bring the tilt angle back to the balanced condition bef
 Tilt measurement is achieved with a MPU6050 combined accelerometer and gyroscope sensor.
 The sensor and a measurement library are provided and the base unit of the chassis has an internal mounting point for the sensor.
 Mounting the sensor in this part of the chassis means there is a strong mechanical coupling to the wheels so measurement is more accurate.
+
 The accelerometer measures in three axes, so it can be used to detect the direction of gravity and therefore the tilt angle of the robot with respect to gravity.
 However, without additional information, it is impossible to distinguish between a gravitational force and a force due to acceleration.
-That means if the robot accelerates in the longitudinal (back/forward) direction, either to move the robot or just to counteract a tilting force, an error will be introduced in the tilt angle measurement.
+That means if the robot accelerates in the longitudinal (back/forward) direction, either to move the robot or just to maintain balance, an error will be introduced in the tilt angle measurement.
 
 This error can be reduced by using the gyroscope measurement.
 Silicon gyroscopes of this type measure the differential of tilt angle, i.e. the rate of change of angle.
@@ -136,7 +138,7 @@ Integrating the output of the sensor will work, but only for a short time becaus
 These problems can be resolved by using a _Complementary Filter_.
 Notice that the integral of the gyroscope is useful over short time periods, before the error grows too large.
 Meanwhile, the tilt angle calculation from the accelerometer will have short-lived error transients due to longitudinal movements, but over a long period of time these will average to zero because the robot cannot accelerate indefinitely.
-Therefore, a complementary filter works by applying a low-pass filter to the tile measured by acceleration and summing it with a high-pass-filtered tilt measured by the gyroscope.
+Therefore, a complementary filter works by applying a low-pass filter to the tilt measured by acceleration and summing it with a high-pass-filtered tilt measured by the gyroscope.
 
 The form of the complementary filter is: $\Theta_{n} = (1-C) \Theta_a + C (\frac{d\Theta_g}{dt} \Delta t + \Theta_{n-1})$
 
@@ -146,7 +148,7 @@ $\Delta t$ is the time interval between iterations and $C$ is a factor between 0
 
 With $C$ close to 1, you can see that $\Theta_{n}$ at any given iteration is mostly derived by integrating the gyroscope measurement (multiplying by $\Delta T$) and adding it to the previous tilt angle.
 This means any rapid changes in tilt, which are measured accurately by the gyroscope without interference from longitudinal acceleration, are reflected in $\Theta_{n}$.
-Because $C<1$, any error in $\frac{d\Theta_g}{dt}$ will not accumulate forever and eventually it will converge to a constant error in $\Theta_{n}$, which is manageable.
+Because $C<1$, any constant error in $\frac{d\Theta_g}{dt}$ will not accumulate forever and eventually it will converge to a constant error in $\Theta_{n}$, which is manageable.
 Meanwhile, the small contribution from $\Theta_a$ will gradually accumulate so, in static conditions after a long period of time, $\Theta_{n} = \Theta_{a} + e_g$, where $e_g$ is the converged accumulated error from the gyroscope.
 With an appropriate value of $C$, $e_g$ will be small and constant, so it will not affect the stability of the PID controller.
 
@@ -166,7 +168,7 @@ You can write code for the Raspberry Pi using many languages and environments, b
 
 ESP32 is a WiFi-enabled microntroller.
 A microcontroller does not run an operating system in the traditional sense and instead the code you write is executed _bare-metal_, without device drivers, memory management, file system or other abstractions that an operating system places between your code and the hardware.
-The lack of operating system means that development for a microcontroller is not high-productivity, but it does have a major advantage when it comes to realtime performance.
+The lack of operating system means that development for a microcontroller can be slow, but it does have a major advantage when it comes to realtime performance.
 Since there is no operating system to deprioritise your task in favour of other processes and system management tasks, you can run code with confidence that things will happen when you expect.
 In the context of this project, that is useful for tasks such as motor and balance control, which rely on data being sensed and pulses sent to the motor at exactly the right time.
 
@@ -175,7 +177,7 @@ Take care when printing messages on the serial terminal, because complex or freq
 In particular, do not add serial print statements to high-frequency interrupt functions.
 The USB port can be connected to the Raspberry Pi, allowing you to exchange messages between the two computers.
 
-Starter code for the ESP32 [is provided](../balance-robot/esp32-starter/).
+Starter code for the ESP32 [is provided](esp32-starter/).
 It runs the stepper motors at a speed proportional to the angle of tilt measured by the accelerometer.
 This isn't the correct algorithm to achieve balancing, but it does show integration of the MPU6050 and stepper motors.
 An Adafruit library is used to communicate with the MPU6050 and the stepper library is written in-house and included as a header file.
@@ -183,14 +185,11 @@ It's designed for high-speed interrupt operation on the ESP32 with a frequently-
 
 The starter code is configured as a [PlatformIO](https://platformio.org/) project, which is a Visual Studio Code plugin for embedded programming. The code uses the Arduino framework, giving access to Arduino libraries and the structure based on `setup()` and `loop()`.
 
-See the definitions in the code to find the pin allocations for connection to the power PCB and MPU6050.
-The full pin mapping of the ESP32 breakout PCB is shown below. The outer pin numbers IO0-IO35 are the ESP32 pin numbers to use in your code, while A0-5 and D0-13 are the Arduino pin numbers marked on the breakout PCB.
-
-![ESP32 pin mapping](ESP32-adapter.png)
+The ESP32 comes with a [breakout board](doc/ESP32-ADC.pdf) that provides easy connection to the IO pins. The ESP32 GPIO numbers are indicated on the PCB, and you can inspect the starter code to find the pin numbers you need to get the example working. Note that SCL and SDA for the MPU6050 uses pins 22 and 21, not the pins labelled SCL and SDA. The breakout board also includes a MCP3208 ADC with 4.096V reference for measuring analogue voltages - it is more accurate than the ADC in the ESP32. The starter code shows how the voltage on pin A0 can be read and sent on the serial terminal.
 
 ### Chassis
 
-[Instructions for assembling the chassis](balance-assembly)
+[Instructions for assembling the chassis](doc/balance-assembly)
 
 The provided robot chassis allows you to build a robot and get it moving around, including balancing.
 The chassis is incomplete at the top, so you may wish to make a head unit that suits the function of your robot.
@@ -247,20 +246,21 @@ The current sense pins are connected to small value resistors in series with the
 
 Use the following rules to use J2 connections safely and effectively:
 
-- You will always need some kind of analogue interface circuit to reduce the voltage from the monitoring pins and connect them to an ADC input.
+- You will always need some kind of analogue interface circuit to reduce the voltage from the monitoring pins and connect them to an ADC input
 - Test your interface circuit carefully with a bench PSU and a multimeter before connecting it to your batteries and logic
-- Ensure that your circuit is constructed and connected robustly. In particular, ensure that the ground connection cannot come lose because that would cause your output voltage to rise to the level of the input voltage.
-- Use a 100kΩ resistor in series with your ADC connections to prevent large current flow
+- Ensure that your circuit is constructed and connected robustly. In particular, ensure that the ground connection cannot come lose because that would cause your output voltage to rise to the level of the input voltage
+- Use a 10kΩ resistor in series with your ADC connections to prevent large current flow
+- Take care when using a circuit powered from one voltage rail to monitor current flowing in another voltage rail. Some circuits can become powered from their inputs if their normal power supply is not turned on
 
 The current measurement resistors are _high side_, meaning that they are in series with the positive rail of the relevant supply.
-The resistance is 0.01Ω, which means, for example, a current of 1A in the 5V supply would give you outputs of 5V and 4.99V on the I5 and 5V pins respectively.
+The resistances are 0.01Ω (5V) and 0.1Ω (motors), which means, for example, a current of 1A in the 5V supply would give you outputs of 5V and 4.99V on the I5 and 5V pins respectively.
 You could reduce both of these voltages with potential dividers and measure both with an ADC input to find the difference, but the accuracy and noise might be poor.
 A better method would be to build a _differential amplifier_ from an opamp, which will amplify the difference between two inputs and present it as a single voltage relative to a reference.
-For example, the case above with a differential gain of 10 and a 1.25V reference would give an output of 1.75V, which is convenient voltage for measuring with an ADC on a 3.3V microcontroller.
+For example, the case above with a differential gain of 10 and a 1.25V reference would give an output of 1.75V, which is convenient voltage for measuring with an ADC with a 4.096V reference.
 
 When designing an amplifier for this purpose, make sure the opamp has a power supply range that supports the input voltage, and that it supports _rail-to-rail input_, meaning that it works even when the input voltage equals the supply voltage.
 
-[Circuit diagram of the power PCB](PCB-Schematic.pdf)
+[Circuit diagram of the power PCB](doc/balance-power.pdf)
 
 #### Stepper Motors
 

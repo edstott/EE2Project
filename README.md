@@ -41,8 +41,8 @@ Finally, every project will draw upon various non-technical skill areas, includi
 | System Implementation | 30/100    | • Evidence that all system interfaces are implemented, using emulation or placeholder data where necessary <br> • Some implementation of functionality in each subsytem <br> • Some infrastructure is in place for evaluation | • Some progress on subsystem implementation <br> • Some progress on system interfaces allowing interaction of some subsystems | • Some sub-system implementation but little attempt at system integration |
 | Project Management    | 20/100     | • All group member roles are defined<br> • Risks and contingencies identified<br> • Significant contribution of each group member <br> • Project management framework adopted | • Clear division of work between group members | • Roles of group members are unclear |
 
-### Report
-
+### Report and Reflection
+ 
 | Weighting of report in module mark | 50/100 |
 | ----------------------------------------- | ------ |
 
@@ -51,7 +51,7 @@ Finally, every project will draw upon various non-technical skill areas, includi
 | Design Process        | 20/100    | • Logical progression of design from top-level requirements to detailed implementation and evaluation<br> • Discussion of all important design decisions with quantitative and qualitative evidence <br> • Interesting discussion of project planning and organisation | •  Requirements in place for most of the functionality of the system<br> • Discussion of design decisions, but some unclear reasoning and/or unimportant details <br> • Full breakdown of task allocation to group members | • Some elaboration of requirements beyond original points in project brief<br> • Some discussion of design decisions, but important aspects given trivial or no reasoning |
 | Implementation        | 55/100    | • Design is a technically complex system of interacting components<br> • Advanced techniques and skills are applied, requiring research beyond module content | • Design is a mostly-functional system, maybe some elements are not integrated <br>• Design makes good use of EEE/EIE module content<br> | • Elements of the project are designed, but the project is not functional as a complete system <br> • Some design elements are technically plausible
 | Evaluation            | 20/100    | • Evidence that tests all requirements<br> • Evaluation of top-level system and individual subsystems <br> • Appropriate tests and metrics devised<br> • Informative visual presentation of data | • Evaluation of most requirements<br> • Use of quantitative and qualitative data | • Some elements of the design are evaluated, but some important aspects are omitted <br> • Low-quality evidence of design outcome
-| Reflection            | 5/100     | • Weekly reflection forms are completed |  | • Weekly reflection forms are not completed |
+| Reflection            | 5/100     | • Individual reflection answers all the questions |  | • Individual reflection does not answer all the questions |
 
 ### Demonstration
 
@@ -76,7 +76,7 @@ Each of the project options contains elements that are suited to students from y
 
 ![Balance robot starter kit](doc/balance-robot.jpg)
 
-[Detailed Requirements and Technical Information](/doc/balance-guide.md)
+[Detailed Requirements and Technical Information](balance-robot/README.md)
 
 The aim of this project is to build a demonstrator robot that can balance on two wheels.
 You should choose an application for the robot that will demonstrate interaction with human users or the environment.
@@ -94,7 +94,7 @@ A robot platform is provided, which contains wheels, motors, batteries, power el
 
 ![A Photovoltaic installation in Spain](doc/Façana_Fotvoltaica.jpg)
 
-[Detailed Requirements and Technical Information](/doc/energy-guide.md)
+[Detailed Requirements and Technical Information](smart-grid/README.md)
 
 The aim of this project is to build an energy management system for connecting a home to a smart grid.
 A photovoltaic array and mechanical flywheel are provided for energy generation and storage.
@@ -115,7 +115,7 @@ These quantities follow established trends but they are not entirely predictable
 
 ![Visualisation of a fractal by Wolfgang Beyer with the program Ultra Fractal 3. - Own work, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=321973](doc/fractal.jpg)
 
-[Detailed Requirements and Technical Information](/doc/accelerator-guide.md)
+[Detailed Requirements and Technical Information](maths-accelerator/README.md)
 
 The aim of this project is to create an educational tool that can visualise a mathematical function.
 Evaluation of the function will be computationally intensive, which means that a custom-logic FPGA accelerator is a good choice for achieving the necessary responsiveness for human interaction.
