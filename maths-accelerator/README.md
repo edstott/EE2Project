@@ -25,7 +25,6 @@ Pynq kits can be borrowed from EEE Stores. They contain:
 - HDMI cable and HDMI-USB adapter
 - Ethernet cable and Ethernet-USB adapter
 - USB Cable
-- WiFi adapter
 
 ### Software
 
@@ -43,7 +42,7 @@ These are suggested tasks for making a start on the project:
 
 You should begin by following the [Pynq setup guide](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html)
 
-The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, load the notebooks provided on the project repository
+The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, work through the notebooks provided in this repository
 
 1. Research areas of mathematics that would make good visualisation and could be implemented with an algorithm that iterates over the image in a raster pattern.
 2. Set up a hardware simulation flow with Verilator that can run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
@@ -61,11 +60,10 @@ The Pynq board can be powered by the USB interface (PROG UART) or an external po
 
 You will need network connectivity to interface with your board.
 
-1. Ethernet (direct): you can plug the Zynq board into an ethernet port on your home router with the included cable. You will need to find the board's IP address to connect - you can do this by looking at DHCP leases on the configuration page for your router, or by typing `ip addr` into the USB command prompt. The board  won't work by connecting it to an ethernet port on the College network unless it happens to have been registered with ICT.
+1. Ethernet (direct): you can plug the Zynq board into an ethernet port on your home router with the included cable. You will need to find the board's IP address to connect - you can do this by looking at DHCP leases on the configuration page for your router, or by typing `ip addr` into the USB command prompt. The board  won't work by connecting it to an ethernet port on the College network unless it happens to have been previously registered with ICT.
 2. Ethernet (via host): the kit includes a USB ethernet adapter, which you can use to connect your Pynq board to the internet via your computer. Connect the Pynq to the ethernet socket and plug the adapter into a USB port on your computer. Then, you need to share your internet connection with the ethernet adapter you have plugged in:
    1. Windows: follow [these instructions](https://www.tomshardware.com/how-to/share-internet-connection-windows-ethernet-wi-fi).
    2. MacOS: follow [these instructions](https://support.apple.com/en-gb/guide/mac-help/mchlp1540/mac)
-3. WiFi: the kit also includes a USB WiFi dongle. Plug it into the USB Host port on the Pynq and the operating system will automatically set it up as a networking device. You will need to access a terminal via Ethernet or USB cable to set up WiFi.
 
 ### Development tools
 
@@ -85,7 +83,9 @@ The purpose of the project is to showcase hardware implementation of an algorith
 
 Visualising fractals is a common exercise in this domain, since they are visually interesting and a good test of computational throughput. An implementation for Pynq [already exists](https://github.com/FredKellerman/pynq-juliabrot), but HDL is not provided.
 
-Simulations are a popular option for visualisation demos, but they tend to be harder to parallelise because the simulation has a global state that must be shared between execution units. For example, in [N-body simulation](https://en.wikipedia.org/wiki/N-body_simulation), the behaviour of every particle in the system depends on the state of every other particle. Then, the particles must be rendered, which requires random access to a video frame buffer (since each particle could be anywhere on the screen), instead of much simpler sequential access. Therefore, these kinds of problems are not recommended unless you are feeling very confident about your digital design skills.
+Simulations are a popular option for visualisation demos, but they tend to be harder to parallelise because the simulation has a global state that must be shared between execution units. For example, in [N-body simulation](https://en.wikipedia.org/wiki/N-body_simulation), the behaviour of every particle in the system depends on the state of every other particle. Then, the particles must be rendered, which requires random access to a video frame buffer (since each particle could be anywhere on the screen), instead of simpler sequential (raster) access. Therefore, these kinds of problems are not recommended unless you are feeling confident about your digital design skills.
+
+You may find it helpful to book a consultation meeting to discuss your choice of algorithm.
 
 ### Working with Pynq Overlays
 
@@ -93,8 +93,8 @@ In Pynq, an overlay is a bitstream (programmable logic configuration) plus a Pyt
 
 This repository contains two Jupyter notebooks to demonstrate the software side of Pynq overlays. Copy the notebooks to `/home/xilinx/jupyter_notebooks/` on the Pynq and load them in a browser at `http://<Pynq IP address>:9090`
 
-- [Software Image Generation](../maths-accelerator/software-image-generation.ipynb) works with the Pynq base overlay. It shows how you can create an image array and send it to the HDMI output
-- [Hardware Image Generation](../maths-accelerator/hardware-image-generation.ipynb) works with the project example overlay. It shows how to grab a frame from a hardware image generator and display it on the HDMI output
+- [Software Image Generation](software-image-generation.ipynb) works with the Pynq base overlay. It shows how you can create an image array and send it to the HDMI output
+- [Hardware Image Generation](hardware-image-generation.ipynb) works with the project example overlay. It shows how to grab a frame from a hardware image generator and display it on the HDMI output
 #### Block Design
 
 The example design is based on the PYNQ base configuration with the addition of a block that generates a video test pattern.
@@ -104,11 +104,11 @@ The block has two main interfaces:
 1. An AXI Stream Output (Master - AMD still uses outdated master/slave terminology), which outputs the video data in raster order. A stream interface is just a bus (32-bits in this case) of data, with a valid signal to indicate each clock cycle when it has been updated. A ready signal acts as _backpressure_, which allows the receiver to pause transmission if it is not ready. A done signal indicates the end of a packet of data, which is a complete horizontal line in the case of video data.
 2. An AXI-Lite Slave port, which allows the control registers of the block to appear as a memory-mapped peripheral. If the user (via Python code on the processor system) wants to change a parameter of the visualisation, they would write the parameter to a specific address on the memory bus. The bus logic of the CPU and IP integrator system ensures that writes to this address are directed to this logic block. When the design is compiled, the address map for the entire system is written to a file, which is then used to find the address for a peripheral when it is accessed by the user code. The AXI-Lite interface has slower data throughput than the streaming interface.
 
-![The example pixel generator](block-focus.png)
+![The example pixel generator](doc/block-focus.png)
 
 The stream output from the block is connected to a Video DMA (direct memory access) IP Block inside the Video sub-block. This block can write to the main memory system independently from the CPU. When a video frame is generated, the DMA writes the image to an array in memory, where it can be accessed by the CPU or read by another DMA block for output to the video device. DMA blocks are configured by the CPU core by a separate AXI-Lite interface but after that they move data around the system without further involvement, which is much quicker than using the CPU core to access every pixel.
 
-Since the example design is already working, you can implement your design by adding your logic to the frame generator block. Make sure that it can still stream pixels out as required. The rest of the system will handle the rest. Modifying the design in the IP Intergator is not necessary, except in advanced cases.
+Since the example design is already working, you can implement your design by adding your logic to the pixel generator block. Make sure that it can still stream pixels out as required. The rest of the system will do everything else. Modifying the design in the IP Intergator is not necessary, except in advanced cases.
 
 #### The Example Image Generator
 
@@ -167,7 +167,7 @@ A more complex algorithm might take multiple clock cycles to generate each pixel
 
 The signals `first` and `lastx` are true during the first pixel of each frame and the last pixel of each line respectively. These signals are passed to downstream logic along with the pixel data and they are used to synchronise the data to the correct position on the display.
 
-The module also instantiates a sub-module `pixel_packer`, which sits between the generated `r`,`g`,`b` values and the stream output. The VDMA module expects to receive 32-bit words of data since these map neatly onto the main memory bus. The three concatenated colour values total only 24 bits, so the pixel packer packs 4 24-bit pixels into 3 32-bit words. Generating the 4 pixels still takes 4 clock cycles (assuming `ready` is true), so the output `valid` signal from the pixel packer is manipulated so that it is only high for 3 out of 4 clock cycles.
+The module also instantiates a sub-module `pixel_packer`, which sits between the generated `r`,`g`,`b` values and the stream output. The VDMA module expects to receive 32-bit words of data since these map neatly onto the main memory bus. The three concatenated colour values total only 24 bits, so the pixel packer packs 4 24-bit pixels into 3 32-bit words. Generating the 4 pixels still takes 4 clock cycles (assuming `ready` and `valid_int` are true), so the output `valid` signal from the pixel packer is manipulated so that it is only high for 3 out of 4 clock cycles.
 
 To summarise the `ready` and `valid` signals:
 - `ready` is asserted by the stream receiver when it is able to accept a new word
@@ -176,7 +176,7 @@ To summarise the `ready` and `valid` signals:
 
 ### Building the Starter Project
 
-1. Install [Vivado 2023.2](https://www.xilinx.com/support/download.html) or [open a session on the departmental server](server-vivado.md).
+1. Install [Vivado 2023.2](https://www.xilinx.com/support/download.html) or [open a session on the departmental server](doc/server-vivado.md).
 2. Clone this repository onto the computer
 3. Run the build script that generates the project
    1. Start Vivado 2023.2
@@ -187,11 +187,11 @@ To summarise the `ready` and `valid` signals:
 4. The scripts compile some IP blocks and generate a Vivado project in \<repository path\>/maths-accelerator/overlay/base. Open it in Vivado
 5. Generate the block design with IP Integrator. This converts the block design to Verilog netlists and creates the hardware handoff file `.hwh` with information about the bus structure and address map for the operating system.
 
-![Generate Block Design](IP-integrator.png)
+![Generate Block Design](doc/IP-integrator.png)
 
 6. Implement the FPGA bitstream. Vivado will ask to synthesise and implement the design as well. This process creates a bitstream `.bit` file that configures the programmable logic on the FPGA
 
-![Generate Bitstream](generate-bitstream.png)
+![Generate Bitstream](doc/generate-bitstream.png)
 
 7. Find the output files and copy them to the user home directory /user/xilinx on the Pynq. Rename them so the files have the same name (keep the `.hwh` and `.bit` extensions). I recommend adding a revision number that you increment each time so you can be sure you are running the latest implementation. You can copy files to the Pynq with `scp` or drag and drop when you have a terminal open in MobaXterm
 
@@ -199,7 +199,7 @@ To summarise the `ready` and `valid` signals:
    2. The `.bit` file is in `base.runs/impl_1`
 
 > [!NOTE]  
-> The build script copies the HDL source files from the src directory in the repository into the generated project structure. That means any changes to the files won't propagate to the FPGA design. Instead, you should edit the source files in the project structure - you can open them from the sources list in Vivado.
+> The build script copies the HDL source files from the src directory in the repository into the generated project structure. That means any changes to these files won't propagate to the FPGA design. Instead, you should edit the source files in the project structure - you can open them from the sources list in Vivado.
 
 ### Rebuilding the Pixel Generator IP
 
