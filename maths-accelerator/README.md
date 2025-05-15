@@ -22,10 +22,10 @@
 Pynq kits can be borrowed from EEE Stores. They contain:
 
 - A Pynq FPGA board
-- HDMI cable and HDMI-USB adapter
+- 16GB MicroSD Card
+- HDMI cable
 - Ethernet cable and Ethernet-USB adapter
 - USB Cable
-- WiFi adapter
 
 ### Software
 
@@ -41,15 +41,11 @@ The project requirements specify that the Pynq board is used to generate the vis
 
 These are suggested tasks for making a start on the project:
 
-You should begin by following the [Pynq setup guide](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html)
-
-The example notebook for video uses a HDMI input, which might not be readily available to you, and it can be unstable. Instead, load the notebooks provided on the project repository
-
 1. Research areas of mathematics that would make good visualisation and could be implemented with an algorithm that iterates over the image in a raster pattern.
-2. Set up a hardware simulation flow with Verilator that can run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
+2. Set up a hardware simulation flow with Icarus Verilog or Verilator that can run a Verilog module that generates the colour for given pixel coordinates. Begin with a simple test pattern. Write a simulation wrapper that loops over the pixels in an image and visualises the result as an image file
 3. Consider interesting methods for human interaction. Look for hardware suggestions or software libraries that might help
-4. Download the [Pynq SD Card Image](https://www.pynq.io/boards.html) onto the Pynq SD Card. You can use [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to write the image. Familiarise yourself with the Pynq operating system and Python overlay interface using the demo notebook. Create a placeholder visualisation in software and set up an interface with a remote server or database that will pass in user parameters
-5. Set up the Vivado tool flow that will allow you to generate your own Pynq overlay
+4. Download the [Pynq SD Card Image](https://www.pynq.io/boards.html) onto the Pynq SD Card. You can use [Raspberry Pi Imager](https://www.raspberrypi.com/software/) to write the image. Use the [Pynq setup guide](https://pynq.readthedocs.io/en/latest/getting_started/pynq_z1_setup.html), the [instructions below](#technical-information-and-suggestions) and the Jupyter Notebooks in this repository to familiarise yourself with the Pynq operating system. You can also refer to the notebooks included on the Pynq image, but I recommend avoiding the examples that use HDMI input.
+5. Set up the [Vivado tool flow](#building-the-starter-project) that will allow you to generate your own Pynq overlay
 
 ## Technical information and suggestions
 
@@ -61,11 +57,10 @@ The Pynq board can be powered by the USB interface (PROG UART) or an external po
 
 You will need network connectivity to interface with your board.
 
-1. Ethernet (direct): you can plug the Zynq board into an ethernet port on your home router with the included cable. You will need to find the board's IP address to connect - you can do this by looking at DHCP leases on the configuration page for your router, or by typing `ip addr` into the USB command prompt. The board  won't work by connecting it to an ethernet port on the College network unless it happens to have been registered with ICT.
+1. Ethernet (direct): you can plug the Zynq board into an ethernet port on your home router with the included cable. You will need to find the board's IP address to connect - you can do this by looking at DHCP leases on the configuration page for your router, or by typing `ip addr` into the USB-serial command prompt. The board  won't work by connecting it to an ethernet port on the College network unless it happens to have been registered with ICT.
 2. Ethernet (via host): the kit includes a USB ethernet adapter, which you can use to connect your Pynq board to the internet via your computer. Connect the Pynq to the ethernet socket and plug the adapter into a USB port on your computer. Then, you need to share your internet connection with the ethernet adapter you have plugged in:
    1. Windows: follow [these instructions](https://www.tomshardware.com/how-to/share-internet-connection-windows-ethernet-wi-fi).
    2. MacOS: follow [these instructions](https://support.apple.com/en-gb/guide/mac-help/mchlp1540/mac)
-3. WiFi: the kit also includes a USB WiFi dongle. Plug it into the USB Host port on the Pynq and the operating system will automatically set it up as a networking device. You will need to access a terminal via Ethernet or USB cable to set up WiFi.
 
 ### Development tools
 
