@@ -7,10 +7,10 @@
     1. The configuration of the PSU shall be determined by characterising a supplied PV array
     2. The current and/or voltage of the PSU shall be manually modulated to emulate the effect of the day/night cycle
     3. The system shall use a switch-mode power supply (SMPS) with variable duty cycle to maximise the energy extracted from the emulated PV array
-3. The system shall store excess energy in a provided flywheel for use at a later time
+3. The system shall store excess energy in a provided supercapacitor for use at a later time
     1. No batteries shall be used
 4. A mismatch between supply and demand of power shall be accommodated by importing from or exporting to an external grid, which is emulated by a PSU with an energy sink.
-    1. The energy imported or exported shall be metered and converted to a monetary value using variable prices specified by the third-party web server
+    1. The energy imported or exported shall be metered and converted to a monetary value using variable prices specified by a third-party web server
 5. The system shall minimise the overall cost of importing energy with an algorithm to decide when to store/release and import/export energy. It shall also choose when to satisfy demands that can be deferred
     1. The algorithm should perform better than a naive algorithm that always acts to minimise the amount of power imported or exported at a given moment, and delivers demands as soon as they are requested.
 6. There shall be a user interface that displays current and historic information about energy flows and stores in the system.
@@ -36,12 +36,6 @@ Your starter kit contains:
 
 Starter code for the Bidirectional SMPS modules is based on the Power Electronics and Power Systems lab. [A skeleton code for the LED driver SMPSs is provided](#appendix---circuit-specifications).
 
-### Lab Benches
-
-Eight lab benches are dedicated to the energy project and they are available for booking.
-Four of the lab benches have flywheels.
-Do not attempt to relocated any lab equipment for this project
-
 ### The Web Server
 
 An external webserver provides information about demands and externalities that you need to meet the project requirements. In particular, you can look up:
@@ -52,7 +46,7 @@ An external webserver provides information about demands and externalities that 
 4. The sun irradiance, represented as a fraction of the maximum current setting to be used for the PSU that emulates the PV input
 5. A history of the irradiance, demand and price from the previous cycle.
 
-The values returned by the webserver change every 5 seconds. They are computed by summing a periodic component, which follows a repeating 5-minute cycle, with a randomised component. Each cycle approximates the characteristics of a day in real life. Data is returned in JSON format and the code used to generate the webserver output is provided for reference.
+The values returned by the webserver change every 5 seconds (tick). They are computed by summing a periodic component, which follows a repeating 5-minute cycle, with a randomised component. Each cycle approximates the characteristics of a day in real life. Data is returned in JSON format and the code used to generate the webserver output is provided for reference.
 
 The webserver is available at [https://icelec50015.azurewebsites.net/](https://icelec50015.azurewebsites.net/). There are various URIs that return JSON objects, all linked from the index page. The webserver code can be seen in its [GitHub repository](https://github.com/edstott/ICelec50015).
 
@@ -64,7 +58,7 @@ A budget is available for you to purchase additional items, but it should be pos
 
 Try the following steps to get started with the project:
 
-1. Gather some initial data from the PV array and Flywheel by connecting them to a load or bench power supply via an SMPS module. Use the SMPS module to vary the energy flow and log the resulting currents and voltages
+1. Gather some initial data from the PV array by connecting it to a rheostat load. You may ask the lab technicians to borrow a rheostat to make measurements outdoors.
 2. Set up the information network with a basic UI that displays some measurements from a database. Set up an SMPS module to log data to the database via WiFi. Set up a mechanism for adjusting the output voltage of an SMPS via the UI.
 3. Gather samples of the randomised daily cycle by downloading data from the external server. Research techniques that could be used to optimise energy cost, considering both heuristic approaches (based on specific rules) and more general approaches based on modelling.
 4. Consider potential layouts for the energy grid, in particular how the SMPS modules could be configured to balance the energy flows and maintain a constant bus voltage.
@@ -87,7 +81,7 @@ The physical bus can be implemented simply by connecting modules to the provided
 
 SMPS modules are bidirectional, meaning that current and power can flow in either direction through the module.
 However, energy transfer requires a higher voltage at Port A (left side) than Port B (right side).
-The photovoltaic arrays output a variable voltage depending on the irradiance from sunlight and the flywheel outputs a variable voltage depending on its speed of rotation.
+The photovoltaic arrays output a variable voltage depending on the irradiance from sunlight and the voltage of the supercapacitor varies with the stored charge.
 Therefore, choose a bus voltage to ensure that every SMPS module will always satisfy Va > Vb.
 
 Each SMPS module can be used in different modes:
@@ -113,16 +107,15 @@ Since power is the product of voltage and current, there exists a point where po
 You need to draw current from the array to extract power, but too much current will reduce the voltage to the point where power reduces.
 
 The first step to optimal use of the PV array is to characterise its I-V (current-voltage) curve. This will need to be completed outside but can be achieved even in overcast conditions.
-Place the PV array in a location with consistent irradiance and connect it to Port A of an SMPS module.
-Connect Port B to a power resistor (supplied in your kit).
-Then, sweep the duty cycle of the SMPS and log the input voltage and current.
+Place the PV array in a location with consistent irradiance and connect it to a rheostat.
+Then, sweep the resistance of the rheostat and log the input voltage and current by measuring them multimeters.
 Find the duty cycle which results in maximum power and you have found the most efficient operating point for the PV array. The cell has an open-circuit voltage $V_O$, a short-circuit current $I_S$, and a point ($V_M$, $I_M$) where power is maximal.
 
-| ![IV Characteristic of a PV Cell](PV-real.svg) |
+| ![IV Characteristic of a PV Cell](doc/PV-real.svg) |
 |:--:|
 | _Typical I-V characteristic of a PV cell_ | 
 
-Unfortunately, this operating point varies with irradiance and temperature, so you cannot simply configure an SMPS to maintain a constant duty cycle to achieve an optimal output.
+Unfortunately, this operating point varies with irradiance and temperature, so you cannot simply configure an SMPS to maintain a constant voltage or current to achieve an optimal output.
 Instead, you need to implement _maximum power point tracking_ to alter voltage and current according to conditions.
 Typically, the controller makes constant adjustments to duty cycle and measures the input power.
 If an adjustment results in increased power, it is kept, otherwise it is reversed.
@@ -130,13 +123,13 @@ If an adjustment results in increased power, it is kept, otherwise it is reverse
 The PV array does not work well under artificial lighting, so you will need to set up a bench PSU in the lab to mimic the PV array under outdoor conditions.
 The simplest approach is to set the voltage and current limits to the values you observed when the array produced maximal power.
 
-| ![Simple PV Cell emulation with a bench power supply](PV-simple.svg) |
+| ![Simple PV Cell emulation with a bench power supply](doc/PV-simple.svg) |
 |:--:|
 | _A bench power supply automatically switches between constant voltage mode and constant current mode such that the voltage limit and the current limit are not exceeded. This results in a rectangular I-V characteristic_ |
 
 You can also add series and parallel resistances to make the I-V function more realistic.
 
-![Simple PV Cell emulation with a bench power supply](PV-improved.svg)
+![Simple PV Cell emulation with a bench power supply](doc/PV-improved.svg)
 
 Series and parallel resistances add slopes to the I-V characteristic, which can make more realistic test conditions for an MPPT algorithm.
 Here, $I_M=I_S-(V_O/R_P)$ and $V_M=V_O-I_M R_S$.
@@ -156,58 +149,25 @@ An alternative would be to use constant current mode to set the power import or 
 
 The SMPS module that you use to connect the external grid to your bus should be configured to measure current so that you can calculate the cost of imported energy and the income from exported energy.
 
-### Flywheel
+### Supercapacitor
 
-The flywheel stores energy in a spinning mass.
-The mass is permanently coupled to a motor with a belt, so driving current into the motor will increase the speed and store energy.
-Drawing current from the motor will take energy from the flywheel and it will slow down.
-If no current flows through the motor, the flywheel will gradually slow down due to friction.
-The voltage across the terminals of the motor varies with its speed, so you will need a SMPS module to convert energy between this variable potential and the fixed potential of your central bus.
+Your kit contains 2 supercapacitors rated at 0.25F and 18V each, which will store around 50J of energy in total when charged to the maximum SMPS voltage. Like a standard capacitor, they store energy as an electric charge according to the formula $E=CV^2$. That means, unlike a battery, you can accurately determine the amount of energy stored by measuring the terminal voltage, subject to the complications discussed below. Ensure that you do not exceed the voltage rating of the capacitor because it will break down and be destroyed.
 
-The flywheel has a simple mechanical construction and does not have the design features for ultra-low friction that you would find in a commercial flywheel.
-A helper motor with external power supply has been added to the flywheel to ensure that it maintains speed for a useful amount of time by applying slightly less torque (turning force) than the friction at a given speed.
-The torque from the helper motor never exceeds the friction, so the kinetic energy in the flywheel is never greater than the energy you have supplied with the input/output motor.
-The microcontroller in the flywheel also ensures that the flywheel doesn't exceed a safe speed.
+The standard capacitors you've used in labs have close to ideal behaviour at low frequencies, but the supercapacitor has higher parasitic resistance. Furthermore, the resistance is distributed across the area of the capacitor plates and this means the localised charge stored in different parts of the capacitor can be temporarily imbalanced. This has a few consequences:
 
-The flywheel can be used to regulate the bus voltage in constant voltage mode, as long as there is sufficient energy stored.
-However, power transfer between the flywheel might be more efficient at a certain I-V point, so MPPT is another option.
-The power flow may be limited at lower rotational speeds due to the torque limit of the belt drive - it will be obvious if you apply too much torque because you will hear the belt skipping.
+- If you apply a large charging current to the capacitor terminals the voltage will rise. But when you stop the current you will observe the voltage fall again as the charge stored near the terminals balances out across the capacitor plates
+- If you short the capacitor terminals out or draw a large discharging current, the terminal voltage will drop to zero. But the capacitor might not be fully discharged as it takes time for the charge to move through the capacitor
+- Passing charge through the internal resistance of the capacitor wastes energy, so you will not be able to recover all the energy you store in the capacitor
 
-#### Tachometer
-
-A tachometer output is available for you to detect the speed of the flywheel, and hence the amount of stored energy.
-The output provides a short pulse once per revolution so you will need to measure the time between pulses to find the speed of rotation. You can connect the tachometer directly to the Raspberry Pi Pico on the SMPS module - some modules are modified with connectors to allow this.
-
-The output is an open collector, which acts like a mechanical switch that is normally open, but closes during the pulse.
-It has a signal and ground pin.
-Normally, the ground pin is connected to ground so that the signal output is pulled down to 0V when the output is on.
-Then, a a pull-up resistor is added that pulls the signal voltage up to logic high when the output is off (open circuit).
-You can configure a microcontroller input, such as those on the Raspberry Pi Pico on the SMPS module, to use an internal pull-up resistor, so no external resistor is needed.
-
-The tachometer is an asynchronous pulse input.
-You can check the value of the input in the main loop of your code, but you will need to compare the value to the previous value to detect a change of the signal.
-You also need to be certain that the execution time of the main loop is always less than the width of the pulse.
-Alternatively, you can configure the microcontroller to trigger an interrupt when the input changes.
-The interrupt works like an automatic function call so you can be sure to run the required code no matter when the pulse happens.
-
-#### Flywheel Substitution
-
-The flywheels are limited in number, so you may wish to explore alternatives to keep your project development progressing.
-
-> [!WARNING]  
-> Do not use batteries in this project. They are a safety hazard.
-
-Your kit contains 2 supercapacitors rated at 0.25F and 18V each, which will store around 50J of energy in total when charged to the maximum SMPS voltage. The terminal voltage of a capacitor increases with the square root of the stored energy, which is a similar characteristic to the flywheel where $E \propto \omega^2$. So they are, to an extent, interchangeable.
-
-It is also possible to emulate storage with a bench PSU and a bidirectional SMPS. Connect the PSU to port A and configure the SMPS to regulate the output port B at a defined voltage. Then, vary the output voltage in proportion to the integral of the current measured at port B, which is exactly the behaviour of a capacitor, and similar to a flywheel. For additional realism, you could emulate inefficient storage by adding resistors in series and/or parallel with the output port. The resistors could be real, or their effect could be modelled in the SMPS code.
+Take time to experiment with the capacitor and confirm that you take account of the internal resistance when you integrate it into your system.
 
 ## Appendix - Circuit Specifications
 
 ### Lab SMPS
 
-[Schematic of the Lab SMPS](./Lab_SMPS_SCM.pdf)
+[Schematic of the Lab SMPS](doc/Lab_SMPS_SCM.pdf)
 
-[Example code for Lab SMPS - Be aware that closed loop mode may not be stable, it was not tuned for your system](../smart-grid/SMPS_2024_Bidirectional.py)
+[Example code for Lab SMPS](SMPS_2024_Bidirectional.py)  - Be aware that closed loop mode may not be stable, it was not tuned for your system
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
@@ -225,9 +185,9 @@ It is also possible to emulate storage with a bench PSU and a bidirectional SMPS
 
 ### LED Driver SMPS
 
-[Schematic of the LED Driver](LED_Driver_SCM.pdf)
+[Schematic of the LED Driver](doc/LED_Driver_SCM.pdf)
 
-[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](../smart-grid/LED_Driver_Example.py)
+[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](LED_Driver_Example.py)
 
 | Specification | Value | Unit |
 | ------------- | ----- | ---- |
