@@ -193,7 +193,6 @@ assign s_axi_lite_bresp = (writeAddr < REG_FILE_SIZE) ? AXI_OK : AXI_ERR;
 
 reg [9:0] x;
 reg [8:0] y;
-//reg [7:0] frame;
 
 wire first = (x == 0) & (y==0);
 wire lastx = (x == X_SIZE - 1);
@@ -203,16 +202,11 @@ wire ready;
 
 always @(posedge out_stream_aclk) begin
     if (periph_resetn) begin
-        if (ready) begin
+        if (ready & valid_int) begin
             if (lastx) begin
                 x <= 9'd0;
-                if (lasty) begin
-                    y <= 9'd0;
-//                    frame <= frame + frame_adv;
-                end
-                else begin
-                    y <= y + 9'd1;
-                end
+                if (lasty) y <= 9'd0;
+                else y <= y + 9'd1;
             end
             else x <= x + 9'd1;
         end
@@ -220,7 +214,6 @@ always @(posedge out_stream_aclk) begin
     else begin
         x <= 0;
         y <= 0;
-//        frame <= 0;
     end
 end
 
