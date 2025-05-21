@@ -2,7 +2,7 @@
 
 ## Chassis Assembly Instructions
 
-Refer to the [interactive model](https://a360.co/4dLysZu) to help you assemble the base chassis.
+Refer to the [interactive model](https://a360.co/4mav1zy) to help you assemble the base chassis.
 Try using the 'Explode Model' and 'Model Browser' features on the toolbar to see get different views of the assembly.
 The model browser allows you to highlight the various components referred to in the instructions below
 

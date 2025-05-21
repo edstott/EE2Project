@@ -291,7 +291,7 @@ always @(posedge clk) begin
 You can run the simulation and view the results with the following commands:
 
 ``` bash
-iverilog -o stream test_AXIS.v packer.v test_streamer.v
+iverilog -o stream test_AXIS.v packer.v pixel_generator.v
 vvp stream
 gtkwave test.vcd                                                    
 ```
