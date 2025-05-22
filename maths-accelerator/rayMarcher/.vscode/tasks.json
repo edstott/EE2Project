@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Raymarcher",
+      "type": "shell",
+      "command": "g++",
+      "args": [
+        "-std=c++17",
+        "main.cpp",
+        "rayMarcher.cpp",
+        "-o",
+        "raymarcher",
+        "-IC:/msys64/ucrt64/include/SDL2",
+        "-LC:/msys64/ucrt64/lib",
+        "-lSDL2"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}
