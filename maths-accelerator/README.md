@@ -299,3 +299,7 @@ gtkwave test.vcd
 If you fork the final command or run it in another terminal, you can rerun the simulation and refresh the display without restarting the viewer.
 
 The second testbench, `test_AXIL.v`, is designed to test the AXI_Lite/MMIO interface. It writes and reads some test data to and from each register. You would only need to use this testbench if you make modifications to the register file size or logic.
+
+## Additional Guides
+
+[Adding a Block Memory to your logic and accessing it from the CPU](doc/bram.md)
