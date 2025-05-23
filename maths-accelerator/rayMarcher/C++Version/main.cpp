@@ -5,11 +5,12 @@
 #include <iostream>
 
 constexpr float PI = 3.14159265f;
+float uTime = 0.0f; //Extern variable that is accessed by the mandelbulb sdf aswell
 
 int main() {
     //SETUP START
-    const int width = 800;
-    const int height = 600;
+    const int width = 400;
+    const int height = 300;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cerr << "SDL failed to initialize: " << SDL_GetError() << std::endl;
         return 1;
@@ -27,7 +28,6 @@ int main() {
     bool running = true;
     SDL_Event event;
     uint32_t* pixels = new uint32_t[width * height];
-    float uTime = 0.0f;
     uint32_t lastTime = SDL_GetTicks();
     //SETUP FINISHED
     

@@ -1,5 +1,7 @@
 #include "rayMarcher.h"
 #include <cmath>
+#include <cstdio>
+#include <iostream>
 using namespace std;
 
 #define MAX_STEPS 100
@@ -97,6 +99,35 @@ float sdfBoxFrame(vec3 p, vec3 b, float e)
     return std::min(std::min(d1, d2), d3);
 }
 
+float sdfMandelbulb(vec3 p, float power) {
+    vec3 pos = p;
+    float dr = 1.0;
+    float r = 0.0;
+    const int Iterations = 5;
+    for (int i = 0; i < Iterations; ++i) {
+        r = p.length();
+        if (r > 2.0) break;
+
+        // Convert to polar coordinates
+        float theta = acos(p.z / r);
+        float phi = atan2(p.y, p.x);
+        dr = pow(r, power - 1.0) * power * dr + 1.0;
+
+        // Scale and rotate the point
+        float zr = pow(r, power);
+        theta = theta * power;
+        phi = phi * power;
+
+        // Convert back to cartesian coordinates
+        p = vec3(
+            sin(theta) * cos(phi),
+            sin(theta) * sin(phi),
+            cos(theta)
+        ).scalarMul(zr).addition(pos);
+    }
+    return 0.5 * log(r) * r / dr;
+}
+
 float scene(vec3 p) {
     //return sdfSphere(p, 1.0f);
 
@@ -107,9 +138,12 @@ float scene(vec3 p) {
     // float roundedCoeff = 0.1f;
     // return sdfRoundedCube(p, squareDimensions, roundedCoeff);
 
-    vec3 boxFrameDimensions(1.0f, 1.0f, 1.0f);
-    float barThickness = 0.1f;
-    return sdfBoxFrame(p, boxFrameDimensions, barThickness);
+    // vec3 boxFrameDimensions(1.0f, 1.0f, 1.0f);
+    // float barThickness = 0.1f;
+    // return sdfBoxFrame(p, boxFrameDimensions, barThickness);
+
+    float power = 6.0f + 2.0f * sin(uTime * 0.15f); //Animate the mandelbulb
+    return sdfMandelbulb(p, power);
 }
 
 float raymarch(vec3 ro, vec3 rd) {

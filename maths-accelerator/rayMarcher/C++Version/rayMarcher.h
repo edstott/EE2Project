@@ -35,5 +35,6 @@ float scene(vec3 p);
 float raymarch(vec3 ro, vec3 rd);
 float dot(vec3 v1, vec3 v2);
 vec3 calcNormal(vec3 p); 
+extern float uTime;
 
 #endif 

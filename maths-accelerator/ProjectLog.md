@@ -19,6 +19,7 @@
 
 ### 23/05/24
 * Finished the ray marching algorithmn, able to shade multiple complex objects with orbiting lighting
+* SDF of animated mandelbulb added
 * Started translating software code into Verilog code
 
 ### 24/05/24
