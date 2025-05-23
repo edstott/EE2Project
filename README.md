@@ -139,3 +139,5 @@ A starter project is provided that demonstrates the interface between a simple v
 - Use numerical analysis to determine the optimum number representations and bit-widths to achieve a suitable accuracy
 - Use human-computer interaction to allow a user to manipulate and understand the visualisation
 - Quantify the impact of design implementation decisions in terms of algorthmic throughput
+#   F P G A _ A c c e l e r a t o r  
+ 
