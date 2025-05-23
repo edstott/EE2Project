@@ -1,6 +1,6 @@
 # Mathematics Accelerator
 
-## Requirements
+### Requirements
 
 1. The system shall display a visualisation of a mathematical function that is computed in real time
     1. The function shall be computationally intensive, such that it is not trivial to generate the visualisation at the required resolution and frame rate
