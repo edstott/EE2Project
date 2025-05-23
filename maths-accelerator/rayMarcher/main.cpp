@@ -33,13 +33,24 @@ int main() {
     SDL_Event event;
     uint32_t* pixels = new uint32_t[width * height];
     float uTime = 0.0f;
+    uint32_t lastTime = SDL_GetTicks();
 
     while (running) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) running = false;
         }
 
-        vec3 lightPosition(-10.0f * cosf(uTime), 10.0f, 10.0f * sinf(uTime));
+        uint32_t currentTime = SDL_GetTicks();
+        float deltaTime = (currentTime - lastTime) / 1000.0f; 
+        lastTime = currentTime;
+        uTime += deltaTime;
+
+        vec3 lightPosition(
+            10.0f * sinf(uTime * 0.5f),
+            //8.0f + 2.0f * sinf(uTime * 0.3f), 
+            10.0f,
+            10.0f * cosf(uTime * 0.5f)
+        );
 
         for (int y = 0; y < height; ++y) {
             for (int x = 0; x < width; ++x) {
@@ -70,7 +81,6 @@ int main() {
         SDL_RenderCopy(renderer, texture, nullptr, nullptr);
         SDL_RenderPresent(renderer);
 
-        uTime += 0.05f;
     }
 
     delete[] pixels;

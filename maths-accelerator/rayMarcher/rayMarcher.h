@@ -10,6 +10,7 @@ public:
     vec3 scalarMul(float mul) const;
     float length() const;
     vec3 normalise() const;
+    vec3 abs() const;
 };
 
 class vec2 {
@@ -24,9 +25,12 @@ public:
     vec3 xyy() const;
     vec3 yxy() const;
     vec3 yyx() const;
+    vec2 abs() const;
 };
 
-float sdSphere(vec3 p, float s);
+float sdfSphere(vec3 p, float s);
+float sdfTorus(vec3 p, vec2 dimensions);
+float sdfBoxFrame(vec3 p, vec3 halfDimensions, float thickness);
 float scene(vec3 p);
 float raymarch(vec3 ro, vec3 rd);
 float dot(vec3 v1, vec3 v2);

@@ -1,9 +1,11 @@
 #include "rayMarcher.h"
 #include <cmath>
+using namespace std;
 
 #define MAX_STEPS 100
 #define MAX_DIST 100.0f
 #define SURFACE_DIST 0.01f
+constexpr float PI = 3.14159265f;
 
 vec3::vec3(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
 vec2::vec2(float x_, float y_) : x(x_), y(y_) {}
@@ -32,33 +34,82 @@ vec3 vec3::scalarMul(float mul) const {
 float vec3::length() const {
     return sqrt(x*x + y*y + z*z);
 }
+float vec2::length() const {
+    return sqrt(x*x + y*y);
+}
 vec3 vec3::normalise() const {
     float len = length();
     return vec3(x/len, y/len, z/len);
 }
+vec3 vec3::abs() const{
+    return vec3(std::fabs(x), std::fabs(y), std::fabs(z));
+}
+vec2 vec2::abs() const{
+    return vec2(std::fabs(x), std::fabs(y));
+}
 
-float sdSphere(vec3 p, float s) {
+float sdfSphere(vec3 p, float s) {
     return p.length() - s;
 }
 
-float sdfTorus(vec3 p, vec2 t)
+float sdfTorus(vec3 p, vec2 t) //t.x is the major radius and t.y is the minor radius
 {
-  vec2 q = vec2(length(p.xz)-t.x,p.y);
-  return length(q)-t.y;
+    float angle = PI * 0.5f;
+    float cosA = cos(angle);
+    float sinA = sin(angle);
+    float y = p.y * cosA - p.z * sinA;
+    float z = p.y * sinA + p.z * cosA;
+    p.y = y;
+    p.z = z;
+
+    vec2 pXZ(p.x, p.z);
+    vec2 q = vec2(pXZ.length()-t.x, p.y);
+    return q.length() - t.y;
 }
 
-float sdfBoxFrame(vec3 p, vec3 b, float e) 
+
+float sdfRoundedCube(vec3 p, vec3 b, float e){
+    p = p.abs();
+    vec3 q = p.subtraction(b);
+    vec3 d = vec3(
+        std::max(q.x, 0.0f),
+        std::max(q.y, 0.0f),
+        std::max(q.z, 0.0f)
+    );
+    float outsideDist = d.length();
+
+    float insideDist = std::min(std::max(q.x, std::max(q.y, q.z)), 0.0f);
+    float distance = outsideDist + insideDist;
+
+    return distance - e;
+}
+
+float sdfBoxFrame(vec3 p, vec3 b, float e)
 {
-    p = abs(p  )-b;
-    vec3 q = abs(p+e)-e;
-    return min(min(
-      length(max(vec3(p.x,q.y,q.z),0.0))+min(max(p.x,max(q.y,q.z)),0.0),
-      length(max(vec3(q.x,p.y,q.z),0.0))+min(max(q.x,max(p.y,q.z)),0.0)),
-      length(max(vec3(q.x,q.y,p.z),0.0))+min(max(q.x,max(q.y,p.z)),0.0));
+    p = p.abs().subtraction(b);
+    vec3 q = p.addition(vec3(e, e, e)).abs().subtraction(vec3(e, e, e));
+    float d1 = vec3(std::max(p.x, 0.0f), std::max(q.y, 0.0f), std::max(q.z, 0.0f)).length() +
+               std::min(std::max(p.x, std::max(q.y, q.z)), 0.0f);
+    float d2 = vec3(std::max(q.x, 0.0f), std::max(p.y, 0.0f), std::max(q.z, 0.0f)).length() +
+               std::min(std::max(q.x, std::max(p.y, q.z)), 0.0f);
+    float d3 = vec3(std::max(q.x, 0.0f), std::max(q.y, 0.0f), std::max(p.z, 0.0f)).length() +
+               std::min(std::max(q.x, std::max(q.y, p.z)), 0.0f);
+    return std::min(std::min(d1, d2), d3);
 }
 
 float scene(vec3 p) {
-    return sdfSphere(p, 1.0f);
+    //return sdfSphere(p, 1.0f);
+
+    //vec2 torusDimensions(1.5f, 0.5f);
+    //return sdfTorus(p, torusDimensions);
+
+    // vec3 squareDimensions(1.0f, 1.0f, 1.0f);
+    // float roundedCoeff = 0.1f;
+    // return sdfRoundedCube(p, squareDimensions, roundedCoeff);
+
+    vec3 boxFrameDimensions(1.0f, 1.0f, 1.0f);
+    float barThickness = 0.1f;
+    return sdfBoxFrame(p, boxFrameDimensions, barThickness);
 }
 
 float raymarch(vec3 ro, vec3 rd) {
