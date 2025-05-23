@@ -62,8 +62,11 @@ int main() {
             for (int x = 0; x < width; ++x) { //Raster pattern
                 //Image plane height: scale * 2
                 //Image plane width: aspect_ratio * scale * 2 
+                //(x + 0.5f) / width  => Maps the centre of the pixel to a range of [0,1] (Centre of a pixel is x+0.5)
+                //2 * ... - 1   => Maps the pixels to a range of [-1, 1] (i.e leftmost pixel has value -1, and rightmost has value of 1)
                 float px = (2.0f * ((x + 0.5f) / width) - 1.0f) * aspect_ratio * scale; //x direction vector of ray for this pixel
-                float py = (1.0f - (2.0f * (y + 0.5f) / height)) * scale; //y direction vector of ray for this pixel
+                float py = -(2.0f * ((y + 0.5f) / height) - 1.0f) * scale; //y direction vector of ray for this pixel
+                //py is calculated in a similar way but the mapping of [-1, 1] needs to flipped as vertical pixel number increases as you go downwards the screen
 
                 vec3 ray_dir(px, py, 1); //This ray goes 1 unit forward in the camera's local +z direction. px and py point the ray in the correct direction
                 ray_dir = ray_dir.normalise(); //Normalise so that we can easily project it to certain distances
