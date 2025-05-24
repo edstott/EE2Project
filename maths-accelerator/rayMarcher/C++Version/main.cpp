@@ -87,8 +87,6 @@ int main() {
                 pixels[y * width + x] = (colorValue << 16) | (colorValue << 8) | colorValue; //Colour in pixels (I don't know how this works)
             }
         }
-
-
         //DRAW FRAME
         SDL_UpdateTexture(texture, nullptr, pixels, width * sizeof(uint32_t));
         SDL_RenderClear(renderer);

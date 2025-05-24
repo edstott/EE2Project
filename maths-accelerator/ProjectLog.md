@@ -22,11 +22,6 @@
 * SDF of animated mandelbulb added
 * Started translating software code into Verilog code
 
-### 24/05/24
-* first point
-* second point
-* third point
-
 ### 25/05/24
 * first point
 * second point
