@@ -76,7 +76,7 @@ int main() {
 
                 float brightness = 0.0f;
                 if (dist < 100.0f) { //If ray hit an object, calculate how lit up that object surface point is
-                    vec3 normal = calcNormal(p); //Calculate normal vector of the surface at point p 
+                    vec3 normal = getSurfaceNormal(p); //Calculate normal vector of the surface at point p 
                     vec3 lightDirection = lightPosition.addition(p.scalarMul(-1)).normalise(); //Calculate normalised light direction vector at point p
                     float diffuseCoeff = std::max(dot(normal, lightDirection), 0.0f); //Dot product both vectors to get the coeff that determines how "lit up" that point is. Read the blog to see how this works
                     brightness = diffuseCoeff; //DiffuseCoeff can take any value between 0 and 1

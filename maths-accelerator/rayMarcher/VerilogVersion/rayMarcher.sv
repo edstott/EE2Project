@@ -1,6 +1,12 @@
+typedef struct packed {
+    logic [31:0] x;
+    logic [31:0] y;
+    logic [31:0] z;
+} vec3;
+
 module rayMarcher(
-    input logic [95:0] ro,
-    input logic [95:0] rd,
+    input vec3 ro,
+    input vec3 rd,
     output logic [31:0] distance
 );
     parameter MAX_STEPS = 100;
@@ -8,8 +14,8 @@ module rayMarcher(
     parameter SURFACE_DIST = 0.01;
     logic [31:0] rayDist;
     logic [31:0] dS;
-    logic [95:0] stepVec;
-    logic [95:0] position;
+    vec3 stepVec;
+    vec3 position;
     
     initial begin
         rayDist = 0.0;

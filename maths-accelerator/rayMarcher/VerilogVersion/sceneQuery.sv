@@ -1,5 +1,11 @@
+typedef struct packed {
+    logic [31:0] x;
+    logic [31:0] y;
+    logic [31:0] z;
+} vec3;
+
 module sceneQuery(
-    input logic [95:0] pos,
+    input vec3 pos,
     output logic [31:0] closestDistance
 );
 

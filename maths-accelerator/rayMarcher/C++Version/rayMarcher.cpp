@@ -157,11 +157,11 @@ float raymarch(vec3 ro, vec3 rd) {
     return rayDist;
 }
 
-vec3 calcNormal(vec3 p) 
-{
+vec3 getSurfaceNormal(vec3 p) 
+{ //See blog explanation here: https://iquilezles.org/articles/normalsSDF/
     const float eps = 0.001; 
     const vec2 h = vec2(eps,0);
-    vec3 normalVector(scene(p.addition(h.xyy())) - scene(p.subtraction(h.xyy())), //See blog explanation here: https://iquilezles.org/articles/normalsSDF/
+    vec3 normalVector(scene(p.addition(h.xyy())) - scene(p.subtraction(h.xyy())), 
                     scene(p.addition(h.yxy())) - scene(p.subtraction(h.yxy())),
                     scene(p.addition(h.yyx())) - scene(p.subtraction(h.yyx())));
     return normalVector.normalise();
