@@ -4,13 +4,19 @@ typedef struct packed {
     logic [31:0] z;
 } vec3;
 
+typedef struct packed {
+    logic [31:0] x;
+    logic [31:0] y;
+} vec2;
+
 module getSurfaceNormal #(
-    parameter int N = 32,     // Total bits
-    parameter int FRAC = 8    // Fractional bits
+    parameter logic [31:0] eps = 0.001; 
 )(
-    input vec3 vec,
-    output logic [N-1:0] length
+    input vec3 p,
+    output vec3 normalVector
 );
+
+    
 
 
 
