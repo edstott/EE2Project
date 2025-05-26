@@ -4,8 +4,8 @@ module inv_sqrt#(
 )(
     input logic clk,
     input logic rst,
-    input logic x_in,
-    output logic inv_sqrt
+    input logic [WIDTH-1:0] x_in,
+    output logic [WIDTH-1:0] inv_sqrt
 );
     //Q8.24
     localparam [WIDTH-1:0] INV_SQRT_2 = 32'h16A0A; // 1/sqrt(0.5)
