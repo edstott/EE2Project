@@ -22,16 +22,11 @@
 * SDF of animated mandelbulb added
 * Started translating software code into Verilog code
 
-### 25/05/24
-* first point
-* second point
-* third point
-
 ## Week 2
 ### 26/05/24
-* first point
-* second point
-* third point
+* Theorised the overall modules required
+* Allocated work on certain modules between all members 
+* Discussed week milestone and further optimisations
 
 ### 27/05/24
 * first point

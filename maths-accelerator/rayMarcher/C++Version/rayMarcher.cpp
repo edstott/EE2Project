@@ -131,19 +131,19 @@ float sdfMandelbulb(vec3 p, float power) {
 float scene(vec3 p) {
     //return sdfSphere(p, 1.0f);
 
-    //vec2 torusDimensions(1.5f, 0.5f);
-    //return sdfTorus(p, torusDimensions);
+    // vec2 torusDimensions(1.5f, 0.5f);
+    // return sdfTorus(p, torusDimensions);
 
     // vec3 squareDimensions(1.0f, 1.0f, 1.0f);
     // float roundedCoeff = 0.1f;
     // return sdfRoundedCube(p, squareDimensions, roundedCoeff);
 
-    // vec3 boxFrameDimensions(1.0f, 1.0f, 1.0f);
-    // float barThickness = 0.1f;
-    // return sdfBoxFrame(p, boxFrameDimensions, barThickness);
+    vec3 boxFrameDimensions(1.0f, 1.0f, 1.0f);
+    float barThickness = 0.1f;
+    return sdfBoxFrame(p, boxFrameDimensions, barThickness);
 
-    float power = 6.0f + 2.0f * sin(uTime * 0.15f); //Animate the mandelbulb
-    return sdfMandelbulb(p, power);
+    // float power = 6.0f + 2.0f * sin(uTime * 0.15f); //Animate the mandelbulb
+    // return sdfMandelbulb(p, power);
 }
 
 float raymarch(vec3 ro, vec3 rd) {

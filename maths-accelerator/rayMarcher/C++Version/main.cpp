@@ -8,7 +8,7 @@ constexpr float PI = 3.14159265f;
 float uTime = 0.0f; //Extern variable that is accessed by the mandelbulb sdf aswell
 
 int main() {
-    //SETUP START
+    //SETUP START (SKIP ALL OF THIS STUFF)
     const int width = 400;
     const int height = 300;
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
