@@ -4,6 +4,8 @@ typedef struct packed {
     logic [31:0] z;
 } vec3;
 
+import vector_pkg::*;
+
 module rayMarcher(
     input vec3 ro,
     input vec3 rd,
