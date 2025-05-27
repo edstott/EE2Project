@@ -48,18 +48,12 @@ import common_defs::*;
     vec3_neg.z = ~a.z + 1;
   endfunction
 
-  function automatic logic signed [DATA_WIDTH-1:0] vec3_dot(input vec3 a, input vec3 b);
+  function automatic fp vec3_dot(input vec3 a, input vec3 b);
     fp xr = fp_mul(a.x, b.x);
     fp yr = fp_mul(a.y, b,y);
     fp zr = fp_mul(a.z, b,z);
     fp sum = fp_add(xr, fp_add(yr,zr));
   endfunction
-
-    // logic signed [2*DATA_WIDTH-1:0] xr, yr, zr, sum;
-    // xr = $signed(a.x) * $signed(b.x);
-    // yr = $signed(a.y) * $signed(b.y);
-    // zr = $signed(a.z) * $signed(b.z);
-    // vec3_dot = (xr >>> FRACT) + (yr >>>FRACT) + (zr >>> FRACT);
 
   // scalar multiply
   // function automatic vec3 vec3_scale(vec3 a, logic signed [DATA_WIDTH-1:0] s);

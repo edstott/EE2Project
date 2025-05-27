@@ -4,7 +4,6 @@ module inv_sqrt#(
     parameter WIDTH = 32,
 )(
     input logic clk,
-    input logic rst,
     input logic [WIDTH-1:0] x,
     output logic [WIDTH-1:0] inv_sqrt
 );

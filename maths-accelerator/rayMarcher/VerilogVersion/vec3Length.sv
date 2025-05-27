@@ -23,7 +23,6 @@ module vec3Length #(
         sum_squares = x2 + y2 + z2;
         inv_sqrt getSqrt(
             .clk(clk),
-            .rst(rst),
             .x_in(sum_squares),
             .inv_sqrt(moduleOut)
         )
