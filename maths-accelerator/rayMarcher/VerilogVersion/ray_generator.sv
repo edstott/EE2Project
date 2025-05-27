@@ -9,7 +9,7 @@ module ray_generator #(
     input logic rst,
     input fp screen_x,  
     input fp screen_y,
-    input logic coords_valid;
+    input logic coords_valid,
     input fp aspect_ratio, // have to use division to compute this, can compute internally or pass as input
     input vec3 camera_forward,
     
@@ -29,6 +29,10 @@ localparam fp INV_HALF_HEIGHT = 32'h006AAAAB; // 1/240 precomputed recipricol fo
 vec3 camera_right, camera_up;
 logic valid_r1, valid_r2, valid_r3;
 
+//fp variables
+fp ndc_x, ndc_y;
+fp pixel_x_fp, pixel_y_fp;
+
 // 1: normalizing pixel coords to [-1,1]
 always_ff @(posedge clk) begin
     if(!rst) begin
@@ -47,7 +51,19 @@ always_ff @(posedge clk) begin
     end
 end
 
-// 2: FOV and aspect ratio to calculate camera up and camera right
+// so far we have normalised pixel coordinates, Set up inputs/outputs and fixed-point constants, identified need for camera basis vectors
+//need to 2: FOV and aspect ratio to calculate camera up and camera right
+
+vec3world_up = '{0, FP_ONE, 0};
+
+always_ff @(posedge clk) begin
+    if (!rst) begin
+        camera_right <= '{0,0,0};
+        camera_up <= '{0,0,0};
+        valid_r2 <= 0; end
+    else if (valid_r1) begin 
+        camera_right <= normalize 
+        
 
 
         
