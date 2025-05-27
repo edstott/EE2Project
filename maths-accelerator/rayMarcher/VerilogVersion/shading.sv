@@ -38,10 +38,7 @@ module shading #(
     localparam logic signed [15:0] DIFF_B = 16'd16384; // 0.5 * 32768
 
 
-    function automatic [7:0] clamp_to_8bit;
-        input signed [DATA_WIDTH-1:0] val;
-        
-
+    function automatic logic [7:0] clamp_to_8bit(input signed [DATA_WIDTH-1:0] val);
         begin
             if (val < 0)
                 clamp_to_8bit = 8'd0;

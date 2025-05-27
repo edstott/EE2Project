@@ -4,7 +4,6 @@ import common_defs::*;
 
   // parameterize your element width
   parameter DATA_WIDTH = 32;
-  parameter FRACT = 16;
   typedef logic signed [DATA_WIDTH-1:0] num;
 
   // normal fixed point arithmetic
