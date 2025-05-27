@@ -1,6 +1,5 @@
 package vector_pkg;
 
-`include "common_defs.sv"
 import common_defs::*;
 
   // parameterize your element width

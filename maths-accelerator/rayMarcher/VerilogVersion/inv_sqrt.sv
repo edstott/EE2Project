@@ -1,21 +1,22 @@
+`include "common_defs.sv"
+
 module inv_sqrt#(
     parameter WIDTH = 32,
-    parameter FRAC_BITS = 24
 )(
     input logic clk,
     input logic rst,
-    input logic [WIDTH-1:0] x_in,
+    input logic [WIDTH-1:0] x,
     output logic [WIDTH-1:0] inv_sqrt
 );
     //Q8.24
-    localparam [WIDTH-1:0] INV_SQRT_2 = 32'h16A0A; // 1/sqrt(0.5)
+    localparam [WIDTH-1:0] INV_SQRT_HALF = 32'h016A09E6; // 1/sqrt(0.5)
     localparam [WIDTH-1:0] FP_TWO = 32'h02000000;
     localparam [WIDTH-1:0] FP_ONE = 32'h01000000; 
     localparam [WIDTH-1:0] FP_HALF = 32'h00800000;
 
     logic [WIDTH-1:0] x_reg;
     logic [WIDTH-1:0] norm_x, scale;
-    logic [3:0] exponent_adj;
+    logic [3:0] exp_adj;
     
     always_ff @(posedge clk) begin
         x_reg <= x;
@@ -72,8 +73,12 @@ module inv_sqrt#(
         endcase
     end
 
-    
+    // linear interpolation in [0.5, 2]
+    always_ff @(posedge clk) begin
+        logic [WIDTH-1:0] interpolation, linear;
+        linear = (norm_x * 32'h00466666) >> FRAC_BITS;
+        interpolation = INV_SQRT_HALF - linear;
+        inv_sqrt <= (interpolation*scale) >> FRAC_BITS;
+    end
 
 endmodule
-
-
