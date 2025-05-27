@@ -1,16 +1,27 @@
 package vector_pkg;
 
+`include "common_defs.sv"
+import common_defs::*;
+
   // parameterize your element width
   parameter DATA_WIDTH = 32;
   parameter FRACT = 16;
   typedef logic signed [DATA_WIDTH-1:0] num;
 
-  // signed fixed-point 3-vector
-  typedef struct packed {
-    logic signed [DATA_WIDTH-1:0] x;
-    logic signed [DATA_WIDTH-1:0] y;
-    logic signed [DATA_WIDTH-1:0] z;
-  } vec3;
+  // normal fixed point arithmetic
+
+  function automatic fp fp_add(input fp a, input fp b);
+    return a+b;
+  endfunction
+
+  function automatic fp fp_mul(input fp a, input fp b);
+    logic signed [63:0] result;
+    result = $signed(a) * $signed(b);
+    result = result >>> FRAC_BITS;
+    return result[31:0];
+  endfunction
+
+  // vector arithmetic
 
   function automatic vec3 make_vec3(input num x, input num y, input num z);
     make_vec3.x = x;
@@ -39,12 +50,17 @@ package vector_pkg;
   endfunction
 
   function automatic logic signed [DATA_WIDTH-1:0] vec3_dot(input vec3 a, input vec3 b);
-    logic signed [2*DATA_WIDTH-1:0] xr, yr, zr, sum;
-    xr = $signed(a.x) * $signed(b.x);
-    yr = $signed(a.y) * $signed(b.y);
-    zr = $signed(a.z) * $signed(b.z);
-    vec3_dot = (xr >>> FRACT) + (yr >>>FRACT) + (zr >>> FRACT);
+    fp xr = fp_mul(a.x, b.x);
+    fp yr = fp_mul(a.y, b,y);
+    fp zr = fp_mul(a.z, b,z);
+    fp sum = fp_add(xr, fp_add(yr,zr));
   endfunction
+
+    // logic signed [2*DATA_WIDTH-1:0] xr, yr, zr, sum;
+    // xr = $signed(a.x) * $signed(b.x);
+    // yr = $signed(a.y) * $signed(b.y);
+    // zr = $signed(a.z) * $signed(b.z);
+    // vec3_dot = (xr >>> FRACT) + (yr >>>FRACT) + (zr >>> FRACT);
 
   // scalar multiply
   // function automatic vec3 vec3_scale(vec3 a, logic signed [DATA_WIDTH-1:0] s);
@@ -52,5 +68,7 @@ package vector_pkg;
   //   vec3_scale.y = (a.y * s) >>> FRACT;
   //   vec3_scale.z = (a.z * s) >>> FRACT;
   // endfunction
+
+  
 
 endpackage : vector_pkg
