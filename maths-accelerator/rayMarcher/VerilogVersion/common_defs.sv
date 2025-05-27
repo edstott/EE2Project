@@ -4,6 +4,8 @@ package common_defs;
 `define FRAC_BITS   24
 `define WORD_WIDTH   (`INT_BITS+`FRAC_BITS)
 
+`define SCREEN_WIDTH    640
+`define SCREEN_HEIGHT   480
 
 typedef logic signed [`WORD_WIDTH-1:0] fp;
 typedef struct packed {
