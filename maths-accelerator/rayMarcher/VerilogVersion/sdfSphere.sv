@@ -7,7 +7,7 @@ module sceneQuery(
     input fp radius,
     output fp outputDistance
 );
-    fp vectorLength; //Allocate lots of bits
+    fp vectorLength; 
     vec3Length calcLength(
         clk(clk),
         vec3(p),

@@ -1,12 +1,10 @@
-typedef struct packed {
-    logic [31:0] x;
-    logic [31:0] y;
-    logic [31:0] z;
-} vec3;
+import vector_pkg::*;
+`include "common_defs.sv"
 
 module sceneQuery(
+    input logic clk,
     input vec3 pos,
-    output logic [31:0] closestDistance
+    output fp closestDistance
 );
 
     // logic [95:0] boxFrameDimensions = (1.0f, 1.0f, 1.0f); //TODO CHANGE THESE
@@ -18,8 +16,9 @@ module sceneQuery(
     //     .outputDistance(closestDistance)
     // );
 
-    logic [31:0] s = 0.1f; //TODO: CHANGE INTO BITS
+    fp s = 32'h0019999a; //s = 0.1
     sdfSphere getDistance (
+        .clk(clk),
         .p(pos),
         .radius(s),
         .outputDistance(closestDistance)
