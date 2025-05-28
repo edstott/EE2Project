@@ -1,5 +1,5 @@
-import common_defs::*;
 import vector_pkg::*;
+`include "common_defs.svh";
 
 module ray_generator #(
     parameter SCREEN_WIDTH = `SCREEN_WIDTH,
@@ -10,7 +10,6 @@ module ray_generator #(
     input fp screen_x,  
     input fp screen_y,
     input logic coords_valid,
-    input fp aspect_ratio, //// have to use division to compute this, can compute internally or pass as input
     input vec3 camera_forward,
     
     output vec3 ray_direction,
@@ -28,7 +27,7 @@ localparam fp FP_ONE = 32'h01000000;
 localparam fp FP_TWO = 32'h02000000;
 localparam fp INV_HALF_WIDTH = 32'h00051EB8;  // 1/320
 localparam fp INV_HALF_HEIGHT = 32'h006AAAAB; // 1/240 precomputed recipricol for now
-
+localparam fp ASPECT_RATIO_640_480 = 32'h01555555;
 
 vec3 camera_right, camera_up;
 logic valid_r1, valid_r2, valid_r3;
@@ -94,7 +93,7 @@ always_ff @(posedge clk)
             valid         <= 0;
     end else if (valid_r2) 
         begin
-            vec3 x_term = vec3_scale(camera_right, fp_mul(ndc_x, aspect_ratio));
+            vec3 x_term = vec3_scale(camera_right, fp_mul(ndc_x, ASPECT_RATIO_640_480));
             vec3 y_term = vec3_scale(camera_up, ndc_y);
             ray_unscaled = vec3_add(vec3_add(x_term, y_term), camera_forward);
     
