@@ -10,18 +10,16 @@ module ray_generator #(
     input fp screen_x,  
     input fp screen_y,
     input logic coords_valid,
+
     input vec3 camera_forward,
+    input fp tan_half_fov, // tan(fov / 2)
+    // should be taking aspect ratio as an input? Compute width/height (make division module)
     
     output vec3 ray_direction,
     output logic valid
 );
 
-// calculating camera up and right vectors internally
-// right [0,1,0] and up calculated using cross product
-// EDGECASE: Approach doesn't work if camera pointing directly up or down (cross product is zero)
-
-
-
+// calculating camera up and right vectors internally using tan approximations
 
 localparam fp FP_ONE = 32'h01000000;
 localparam fp FP_TWO = 32'h02000000;
@@ -31,8 +29,8 @@ localparam fp ASPECT_RATIO_640_480 = 32'h01555555;
 
 vec3 camera_right, camera_up;
 logic valid_r1, valid_r2, valid_r3;
-
-// global fp variables
+vec3 ray;
+fp ray_mag_sq, inv_ray_mag;
 fp ndc_x, ndc_y;
 fp pixel_x_fp, pixel_y_fp;
 
@@ -50,59 +48,66 @@ always_ff @(posedge clk) begin
     end
 end
 
-// so far we have normalised pixel coordinates, Set up inputs/outputs and fixed-point constants
 // 2: FOV and aspect ratio to calculate camera up and camera right
-vec3 world_up = '{0, FP_ONE, 0};
 
-vec3 right_unscaled, up_unscaled;
-fp right_len_sq, up_len_sq;
-fp right_inv_len, up_inv_len;
-
-always_ff @(posedge clk) 
-    begin
-        if (!rst) begin
-            camera_right <= '{0,0,0};
-            camera_up    <= '{0,0,0};
-            valid_r2     <= 0;
-    end else if (valid_r1) 
-	    begin
-            right_unscaled = cross(camera_forward, world_up);
-            up_unscaled    = cross(right_unscaled, camera_forward);
-    
-            right_len_sq = vec3_dot(right_unscaled, right_unscaled);
-            up_len_sq    = vec3_dot(up_unscaled, up_unscaled);
-    
-            right_inv_len = inv_sqrt(right_len_sq);
-            up_inv_len    = inv_sqrt(up_len_sq);
-    
-            camera_right <= vec3_scale(right_unscaled, right_inv_len);
-            camera_up    <= vec3_scale(up_unscaled, up_inv_len);
-    
-            valid_r2 <= 1;
-        end
+always_ff @(posedge clk) begin
+    if(!rst) begin
+        camera_x <= 0;
+        camera_y <= 0;
+        valid_r2 <= 0;
+    end else begin
+        camera_x <= fp_mul(fp_mul(ndc_x, ASPECT_RATIO_640_480), tan_half_fov);
+        camera_y <= fp_mul(ndc_y, tan_half_fov);
+        valid_r2 <= valid_r1;
+    end
 end
 
-// last part; compute ray direction
+// ray direction
+
 vec3 ray_unscaled;
 fp ray_len_sq, ray_inv_len;
 
-always_ff @(posedge clk) 
-    begin
-        if (!rst) begin
-            ray_direction <= '{0, 0, 0};
-            valid         <= 0;
-    end else if (valid_r2) 
-        begin
-            vec3 x_term = vec3_scale(camera_right, fp_mul(ndc_x, ASPECT_RATIO_640_480));
-            vec3 y_term = vec3_scale(camera_up, ndc_y);
-            ray_unscaled = vec3_add(vec3_add(x_term, y_term), camera_forward);
-    
-            ray_len_sq  = vec3_dot(ray_unscaled, ray_unscaled);
-            ray_inv_len = inv_sqrt(ray_len_sq);
-            ray_direction <= vec3_scale(ray_unscaled, ray_inv_len);
-    
-            valid <= 1;
-        end
+always_ff @(posedge clk) begin
+    if(!rst) begin
+        ray <= `{default:0};
+        valid_r3 <= 0;
+    end else begin
+        ray.x <= camera_x;
+        ray.y <= camera_y;
+        ray.z <= -FP_ONE;
+        valid_r3 <= valid_r2;
+    end
 end
+
+// have to transform to world space if we are rotating camera (can skip if camera fixed)
+vec3 world_ray;
+always_comb begin
+    if(camera_forward.x == 0 && camera_forward == 0 && camera_forward.z == -FP_ONE) begin
+        world_ray = ray;
+    end
+    else begin
+        // TODO:
+        // do transformation from local ray to world 
+    end
+end
+
+// normalization
+always_comb begin
+    ray_mag_sq = vec3_dot(world_ray, world_ray);
+end
+
+inv_sqrt invsq_ray(
+    .clk(clk),
+    .x(ray_mag_sq),
+    .inv_sqrt(inv_ray_mag)
+);
+
+always_comb begin
+    ray_direction.x = fp_mul(world_ray.x, inv_ray_mag);
+    ray_direction.y = fp_mul(world_ray.y, inv_ray_mag);
+    ray_direction.z = fp_mul(world_ray.z, inv_ray_mag);
+    valid = valid_r3;
+end
+    
 
 endmodule

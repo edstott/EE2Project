@@ -66,8 +66,9 @@ package vector_pkg;
   endfunction
 
   function automatic vec3 vec3_cross(input vec3 a, input vec3 b);
-
-
+    vec3_cross.x = fp_mul(a.y, b.z) - fp_mul(a.z,b.y);
+    vec3_cross.y = fp_mul(a.z, b.x) - fp_mul(a.x, b.z);
+    vec3_cross.z = fp_mul(a.x, b.y) - fp_mul(a.y, b.x);
   endfunction
 
   // scalar multiply
