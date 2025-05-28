@@ -8,10 +8,11 @@ module rayMarcher #(
 )(
     input logic clk,
     input logic start, //signal to start new raymarch process
-    input vec3 ro,
-    input vec3 rd,
+    input vec3 rayOrigin,
+    input vec3 rayDir,
     output fp distance,
-    output logic done, //signal to send to higher module that raymarch process is done
+    output vec3 point,
+    output logic done //signal to send to higher module that raymarch process is done
 );
 
     fp rayDist, dS;
@@ -37,15 +38,17 @@ module rayMarcher #(
             rayDist <= '0;
             stepCounter <= 0;
             done <= 1'b0;
+            point <= '0;
         end else begin
             currentState <= nextState;
             if (currentState == IDLE) begin
                 rayDist <= 0;
                 stepCounter <= 0;
                 done <= 1'b0;
+                point <= '0;
             end
             else if (currentState == STEP) begin
-                rayDist <= fp_add(rayDist, dS);
+                rayDist <= fp_add(rayDist, dS); 
                 stepCount <= stepCount + 1;
             end
             else if (currentState == DONE) begin
@@ -58,8 +61,8 @@ module rayMarcher #(
         case (currentState)
             IDLE: nextState = STEP;
             STEP: begin
-                stepVec = vec3_scale(rd, rayDist);
-                position = vec3_add(ro, stepVec);
+                stepVec = vec3_scale(rayDir, rayDist);
+                position = vec3_add(rayOrigin, stepVec);
                 if (rayDist > MAX_DIST || dS < SURFACE_DIST || stepCount >= MAX_STEPS)
                     nextState = DONE;
                 else nextState = STEP;
@@ -69,5 +72,6 @@ module rayMarcher #(
     end
 
     assign distance = rayDist;
+    assign point = position;
 
 endmodule
