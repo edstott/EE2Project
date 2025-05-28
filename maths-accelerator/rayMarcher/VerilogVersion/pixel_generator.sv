@@ -1,3 +1,6 @@
+import vector_pkg::*;
+`include "common_defs.svh";
+
 module pixel_generator(
     input           out_stream_aclk,
     input           s_axi_lite_aclk,
@@ -20,7 +23,7 @@ module pixel_generator(
     input [AXI_LITE_ADDR_WIDTH-1:0]     s_axi_lite_awaddr,
     output          s_axi_lite_awready,
     input           s_axi_lite_awvalid,
-
+'
     input           s_axi_lite_bready,
     output [1:0]    s_axi_lite_bresp,
     output          s_axi_lite_bvalid,
@@ -36,8 +39,7 @@ module pixel_generator(
 
 );
 
-localparam X_SIZE = 640;
-localparam Y_SIZE = 480;
+
 parameter  REG_FILE_SIZE = 8;
 localparam REG_FILE_AWIDTH = $clog2(REG_FILE_SIZE);
 parameter  AXI_LITE_ADDR_WIDTH = 8;
@@ -173,10 +175,18 @@ reg [9:0] x;
 reg [8:0] y;
 
 wire first = (x == 0) & (y==0);
-wire lastx = (x == X_SIZE - 1);
-wire lasty = (y == Y_SIZE - 1);
-wire [7:0] frame = regfile[0];
+wire lastx = (x == `SCREEN_WIDTH - 1);
+wire lasty = (y == `SCREEN_HEIGHT - 1);
+wire [31:0] lightx = regfile[0];
+wire [31:0] lighty = regfile[1];
+wire [31:0] lightz = regfile[2];
+
 wire ready;
+
+vec3 light_pos = make_vec3(32'h0093EA1C, 32'h0093EA1C, 32'h0093EA1C);
+vec3 camera_pos = make_vec3(32'h01000000, 32'h00800000, 32'h01000000);
+vec3 camera_target = make_vec3(0,0,0);
+vec3 camera_forward = vec3_sub(camera_target, camera_pos);
 
 always @(posedge out_stream_aclk) begin
     if (periph_resetn) begin
@@ -195,12 +205,36 @@ always @(posedge out_stream_aclk) begin
     end
 end
 
-wire valid_int = 1'b1;
+    //Ray Unit I/O ports
 
-wire [7:0] r, g, b;
-assign r = x[7:0] + frame;
-assign g = y[7:0] + frame;
-assign b = x[6:0]+y[6:0] + frame;
+    logic valid_coor = 1'b1;         //indicate
+    logic [7:0] r, g, b;
+    logic rst_gen = 1'b1;
+    fp distance;
+    vec3 surface_point;
+    logic rayunit_valid
+
+ray_unit rayunit (
+    .clk(out_stream_aclk),
+    .rst_gen(rst_gen),
+    .screen_x(x),
+    .screen_y(y),
+    .coords_valid(valid_coor),
+    .camera_forward(camera_forward),
+    .ray_origin(camera_pos),
+    .distance(distance),
+    .surface_point(surface_point),
+    .valid(rayunit_valid)
+);
+
+getSurfaceNormal surface_normal(
+
+);
+
+shading shading_m(
+
+
+);
 
 packer pixel_packer(    .aclk(out_stream_aclk),
                         .aresetn(periph_resetn),
