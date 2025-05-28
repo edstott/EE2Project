@@ -1,4 +1,4 @@
-`include "common_defs.sv"
+`include "common_defs.svh";
 
 module inv_sqrt#(
     parameter WIDTH = 32,

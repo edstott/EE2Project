@@ -1,4 +1,5 @@
 import vector_pkg::*;
+`include "common_defs.svh";
 
 module rayMarcher(
     input vec3 ro,

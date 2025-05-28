@@ -1,6 +1,13 @@
 package vector_pkg;
 
-import common_defs::*;
+  `include "common_defs.svh";
+
+  typedef logic signed [`WORD_WIDTH-1:0] fp;
+  typedef struct packed {
+      fp x;
+      fp y;
+      fp z;
+  } vec3;
 
   // parameterize your element width
   parameter DATA_WIDTH = 32;
@@ -15,7 +22,7 @@ import common_defs::*;
   function automatic fp fp_mul(input fp a, input fp b);
     logic signed [63:0] result;
     result = $signed(a) * $signed(b);
-    result = result >>> FRAC_BITS;
+    result = result >>> `FRAC_BITS;
     return result[31:0];
   endfunction
 
@@ -52,6 +59,11 @@ import common_defs::*;
     fp yr = fp_mul(a.y, b,y);
     fp zr = fp_mul(a.z, b,z);
     fp sum = fp_add(xr, fp_add(yr,zr));
+  endfunction
+
+  function automatic vec3 vec3_cross(input vec3 a, input vec3 b);
+
+
   endfunction
 
   // scalar multiply
