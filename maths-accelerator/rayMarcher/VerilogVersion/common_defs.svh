@@ -1,4 +1,5 @@
-package common_defs;
+`ifndef COMMON_DEFS_SVH
+`define COMMON_DEFS_SVH
 
 `define INT_BITS    8
 `define FRAC_BITS   24
@@ -7,11 +8,5 @@ package common_defs;
 `define SCREEN_WIDTH    640
 `define SCREEN_HEIGHT   480
 
-typedef logic signed [`WORD_WIDTH-1:0] fp;
-typedef struct packed {
-    fp x;
-    fp y;
-    fp z;
-} vec3;
 
-endpackage
+`endif // COMMON_DEFS_SVH

@@ -26,7 +26,7 @@ module shading #(
     logic [DATA_WIDTH-1:0] amb_r_fixed, amb_g_fixed, amb_b_fixed;  
     logic [DATA_WIDTH-1:0] diff_r_fixed, diff_g_fixed, diff_b_fixed;
 
-    localparam logic [DATA_WIDTH-1:0] HALF = 32'h00008000;
+    localparam logic [DATA_WIDTH-1:0] HALF = 32'h00800000;
 
     //all Q0.15 
     localparam logic signed [15:0] AMB_R = 16'd6553;   // 0.2 * 32768

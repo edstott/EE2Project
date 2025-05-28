@@ -1,5 +1,5 @@
-import common_defs::*;
 import vector_pkg::*;
+`include "common_defs.svh";
 
 module ray_generator #(
     parameter SCREEN_WIDTH = `SCREEN_WIDTH,
