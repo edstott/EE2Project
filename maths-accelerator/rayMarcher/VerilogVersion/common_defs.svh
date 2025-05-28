@@ -8,5 +8,7 @@
 `define SCREEN_WIDTH    640
 `define SCREEN_HEIGHT   480
 
+`define COLOR_WIDTH     24
+
 
 `endif // COMMON_DEFS_SVH

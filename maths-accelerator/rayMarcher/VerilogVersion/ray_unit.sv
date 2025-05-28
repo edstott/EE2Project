@@ -15,8 +15,15 @@ module ray_unit #(
     output logic valid
 );
 
-    logic raygen_valid;
-    vec3 ray_direction;
+    logic raygen_valid, q_raygen_valid;
+    vec3 ray_direction, q_ray_direction;
+
+always_ff @ (posedge clk) begin
+
+    q_raygen_valid <= raygen_valid;
+    q_ray_direction <= ray_direction;
+
+end
 
 ray_generator ray_gen (
     .clk(clk),
@@ -30,11 +37,13 @@ ray_generator ray_gen (
 );
 
 rayMarcher ray_marcher(
-    .ro(ray_origin),
-    .rd(ray_direction),
+    .clk(clk),
+    .start(raygen_valid),
+    .rayOrigin(ray_origin),
+    .rayDir(ray_direction),
     .distance(distance),
     .point(surface_point),
-    .valid (valid)
+    .done (valid)
 );
 
 endmodule

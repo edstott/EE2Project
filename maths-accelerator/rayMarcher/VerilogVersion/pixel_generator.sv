@@ -183,14 +183,14 @@ wire [31:0] lightz = regfile[2];
 
 wire ready;
 
-vec3 light_pos = make_vec3(32'h0093EA1C, 32'h0093EA1C, 32'h0093EA1C);
+vec3 light_pos = make_vec3(lightx, lighty, lightz); //default: 32'h0093EA1C 
 vec3 camera_pos = make_vec3(32'h01000000, 32'h00800000, 32'h01000000);
 vec3 camera_target = make_vec3(0,0,0);
 vec3 camera_forward = vec3_sub(camera_target, camera_pos);
 
 always @(posedge out_stream_aclk) begin
     if (periph_resetn) begin
-        if (ready & valid_int) begin
+        if (ready & valid_coor) begin
             if (lastx) begin
                 x <= 9'd0;
                 if (lasty) y <= 9'd0;
@@ -208,7 +208,6 @@ end
     //Ray Unit I/O ports
 
     logic valid_coor = 1'b1;         //indicate
-    logic [7:0] r, g, b;
     logic rst_gen = 1'b1;
     fp distance;
     vec3 surface_point;
@@ -227,19 +226,34 @@ ray_unit rayunit (
     .valid(rayunit_valid)
 );
 
+    //Normal and Light I/O ports
+
+    vec3 normal_vec;
+    vec3 light_vec;
+
 getSurfaceNormal surface_normal(
 
 );
 
-shading shading_m(
+    //Shading I/O ports
 
+    logic [`COLOR_WIDTH - 1:0] pixel_color;
+
+shading shading_m(
+    .normal_vec(),
+    .light_vec(),
+    .shade_out(pixel_color)
 
 );
+
+logic [`COLOR_WIDTH-1:0] r, g, b;
+
+assign {r,g,b} = pixel_color;
 
 packer pixel_packer(    .aclk(out_stream_aclk),
                         .aresetn(periph_resetn),
                         .r(r), .g(g), .b(b),
-                        .eol(lastx), .in_stream_ready(ready), .valid(valid_int), .sof(first),
+                        .eol(lastx), .in_stream_ready(ready), .valid(!!!!!!!), .sof(first),
                         .out_stream_tdata(out_stream_tdata), .out_stream_tkeep(out_stream_tkeep),
                         .out_stream_tlast(out_stream_tlast), .out_stream_tready(out_stream_tready),
                         .out_stream_tvalid(out_stream_tvalid), .out_stream_tuser(out_stream_tuser) );
