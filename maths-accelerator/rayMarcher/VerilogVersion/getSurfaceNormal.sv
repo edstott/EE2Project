@@ -1,8 +1,4 @@
-typedef struct packed {
-    logic [31:0] x;
-    logic [31:0] y;
-    logic [31:0] z;
-} vec3;
+`include "common_defs.sv"
 
 typedef struct packed {
     logic [31:0] x;
@@ -16,7 +12,7 @@ module getSurfaceNormal #(
     output vec3 normalVector
 );
 
-    
+
 
 
 

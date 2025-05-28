@@ -1,16 +1,15 @@
-typedef struct packed {
-    logic [31:0] x;
-    logic [31:0] y;
-    logic [31:0] z;
-} vec3;
+import vector_pkg::*;
+`include "common_defs.sv"
 
 module sceneQuery(
+    input logic clk,
     input vec3 p,
-    input logic [31:0] radius,
-    output logic [31:0] outputDistance
+    input fp radius,
+    output fp outputDistance
 );
-    parameter [31:0] vectorLength; //Allocate lots of bits
+    fp vectorLength; //Allocate lots of bits
     vec3Length calcLength(
+        clk(clk),
         vec3(p),
         length(vectorLength)
     );
