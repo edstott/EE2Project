@@ -127,3 +127,9 @@ Clocks.fclk3_mhz = 50.0
 However, in the original base overlay, the pixel generator is connected to FCLK1 to match the VDMA and other blocks using the same AXI bus. The default frequency is 142MHz, a value that's required to meet the pixel rate for the HDMI output.
 
 In the overlay provided in this and subsequent versions of this repository, clocking has been reorganised so that a dedicated clock, FCLK3, is used for the pixel generator. That allows you to set the clock frequency for your logic freely.
+
+> [!NOTE]  
+> The FPGA logic is reset when the clock frequency is changed, so you will need to reinitialise the DMA and maybe other blocks.
+
+> [!NOTE]  
+> According to the documentation, the streaming busses connected to a VDMA should not have a clock frequency lower than the memory-mapped bus used to control the VDMA, which is 100MHz in the base overlay. It still seems to work if this condition is violated, but the long-term reliability is not clear.
