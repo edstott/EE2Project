@@ -20,8 +20,7 @@ wire signed [9:0] x_centre = x - 10'd320;
 wire signed [9:0] y_centre = (y << 1) - 10'd480;
 wire [31:0] result;
                         
-cordic_0 cordic(    .s_axis_cartesian_tvalid(1'b1),
-                    .s_axis_cartesian_tdata({6'b0, x_centre >>> 1, 6'b0, y_centre >>> 1}),
+cordic_0 cordic(    .s_axis_cartesian_tdata({6'b0, x_centre >>> 1, 6'b0, y_centre >>> 1}),
                     .m_axis_dout_tdata(result));
 
 assign r = 8'b0;
@@ -72,6 +71,26 @@ Using the [API described below](#changing-the-clock-frequency), the clock freque
 
 The impact of the timing faults is now clear. Notice that the distribution of bad pixels has a pattern - this shows how the failing timing paths are only exercised under certain inputs. There can be a huge variations in the time taken to complete a calculation depending on the combination of input bits. Yes, this is rather inefficient, but trying to better (e.g. asynchronous logic) runs into severe practical challenges. Anyway, the performance of modern, large-scale chips tends to be constrained by power rather than clock speed.
 
+## Changing the Clock Frequency
+
+The Pynq processor system has four clock outputs that can be queried and changed dynamically with the Python library:
+
+```python
+from pynq import Clocks
+Clocks.fclk3_mhz
+Clocks.fclk3_mhz = 50.0
+```
+
+However, in the original base overlay, the pixel generator is connected to FCLK1 to match the VDMA and other blocks using the same AXI bus. The default frequency is 142MHz, a value that's required to meet the pixel rate for the HDMI output.
+
+In the overlay provided in this and subsequent versions of this repository, clocking has been reorganised so that a dedicated clock, FCLK3, is used for the pixel generator. That allows you to set the clock frequency for your logic freely.
+
+> [!NOTE]  
+> The FPGA logic is reset when the clock frequency is changed, so you will need to reinitialise the DMA and maybe other blocks.
+
+> [!NOTE]  
+> According to the documentation, the streaming busses connected to a VDMA should not have a clock frequency lower than the memory-mapped bus used to control the VDMA, which is 100MHz in the base overlay. It still seems to work if this condition is violated, but the long-term reliability is not clear.
+
 ## Clock Division
 
 A simple way to fix timing failure is to divide the clock so that your logic completes one calculation every two or more clock cycles. There are two ways to achieve it:
@@ -109,27 +128,71 @@ At the interfaces to your module the clock must remain consistent with the signa
 
 Pipelining is a method of increasing the maximum clock frequency of a design. Clock frequency is limited by the longest path of combinational logic that exists between one register and another. If an extra register is inserted somewhere along that path, the clock frequency can be increased.
 
-Adding a pipeline register means it now takes one more clock cycle for a calculation to complete, so the _latency_ - the time taken for a calculation to complete - is not improved. But the first stage of the pipeline can begin the second calculation while the second stage completes the first, so _throughput_ - the number of calculations per unit time - is improved. The pipelined and non-pipelined versions both complete one calculation per clock cycle, but the clock frequency of the pipelined version is higher.
+Adding a pipeline register means it now takes one more clock cycle for a calculation to complete, so the _latency_ - the time taken for a calculation to complete - is longer. But the first stage of the pipeline can begin the second calculation while the second stage completes the first, so _throughput_ - the number of calculations per unit time - is improved. The pipelined and non-pipelined versions both complete one calculation per clock cycle, but the clock frequency of the pipelined version is higher.
 
+Since pipelining introduces a latency, you must ensure that data remains synchronised. For example, the following operation adds three numbers to give $y_n = a_n + b_n + c_n$, where $n$ is the clock cycle number:
 
-
-
-## Changing the Clock Frequency
-
-The Pynq processor system has four clock outputs that can be queried and changed dynamically with the Python library:
-
-```python
-from pynq import Clocks
-Clocks.fclk3_mhz
-Clocks.fclk3_mhz = 50.0
+```verilog
+assign y = a + b + c;
 ```
 
-However, in the original base overlay, the pixel generator is connected to FCLK1 to match the VDMA and other blocks using the same AXI bus. The default frequency is 142MHz, a value that's required to meet the pixel rate for the HDMI output.
+Adding a pipeline stage would look like this:
 
-In the overlay provided in this and subsequent versions of this repository, clocking has been reorganised so that a dedicated clock, FCLK3, is used for the pixel generator. That allows you to set the clock frequency for your logic freely.
+```verilog
+always @(posedge clk) begin
+    intermediate <= a + b;
+    c_delayed <= c;
+end
+assign y = intermediate + c_delayed;
+```
+
+The value of `c` goes through a pipeline register as well as the intermediate result, so that `a`, `b` and `c` are synchronised. The result is $y_n = a_{n-1} + b_{n-1} + c_{n-1}$. Without the `c_delayed` register, the calculation would be $y_n = a_{n-1} + b_{n-1} + c_{n}$ and the value of `c` is not synchronised with `a` and `b`.
+
+### Pipelining with a streaming protocol
+
+In the AXI-S video stream protocol, each pixel (or word after the Pixel Packer block) has some associated flags: `tlast` for the last pixel of a line, and `tuser` for the first pixel of a frame. After pipelining, these must remain synchronised to their associated pixels, otherwise the image may become shifted or the VDMA may fail entirely. Furthermore, on initialisation, the pipeline will contain some invalid data that should be flushed out before the first valid result is written to the stream.
+
+In the CORDIC example from above, the IP block can be configured to include pipelining.
+
+![Configuration GUI for the CORDIC IP block, showing the pipeline mode and latency](cordic-pipeline.png)
+
+Setting the pipelining mode to 'Optimal' and viewing the implementation details shows that the block will have a latency of 12 clock cycles. Now the block will have a clock input and there is also an option for a clock enable, which can be used to stall the pipeline when the rest of the system is not ready. The instantiation looks like this:
+
+```verilog
+wire cordic_en = valid_int & (ready | ~cordic_valid)
+cordic_0 cordic(    .aclk(out_stream_aclk),
+                    .aclken(cordic_en),
+                    .s_axis_cartesian_tdata({6'b0, x_centre >>> 1, 6'b0, y_centre >>> 1}),
+                    .m_axis_dout_tdata(result));
+```
+
+The clock connection is straightforward but the enable (`cordic_en`) is more complicated. First, we need to add some shift registers that will pipeline the `tlast`, `tuser` and `valid` signals:
+
+```verilog
+reg [11:0] valid_shift = 12'h0, tlast_shift = 12'h0, tuser_shift = 12'h0;
+
+always @(posedge out_stream_aclk) begin
+    if (cordic_en) begin
+        valid_shift <= {valid_shift[10:0], valid_int};
+        tlast_shift <= {tlast_shift[10:0], lastx};
+        tuser_shift <= {tuser_shift[10:0], first};
+    end
+end
+
+wire cordic_valid = valid_shift[11];
+wire cordic_tlast = tlast_shift[11];
+wire cordic_tuser = tuser_shift[11];
+```
+
+Each shift register has 12 bits, the same as the latency of the CORDIC module. The same enable signal as the CORDIC block is used. That means, if some pixel coordinates are fed into the CORDIC algorithm, when the result emerges it will be synchronised with the flags for that pixel, which are at the output of their shift registers.
+
+There is also a shift register for the `valid` signal. In this code, the input pixel coordinates are always valid so the input to this shift register (`valid_int`) is just 1. But when the logic is first initialised the contents of the CORDIC pipeline are not valid, so this shift register is initialised to zeros. Only after 12 clock cycles (with enable true) will the first valid output emerge from the CORDIC block and the output of the shift register become true.
+
+At startup, we need to automatically flush the pipeline to get the first valid output to the streaming interface and this explains the enable logic `cordic_en = valid_int & (ready | ~cordic_valid)`. Assuming the input coordinates are valid (which is always true here), the pipeline will advance if the streaming interface is ready for data, or if the pipeline output is not valid. If the output is valid and the stream is ready, then a pixel will be transferred over the interface and the pipeline should advance to generate the next pixel. If the pipeline output is not valid then the pipeline should advance until the output is valid; no streaming transfer will take place regardless of the state of `ready` because the output is not valid. Finally, if the output is valid but the stream is not ready, the pipeline should stall until `ready` becomes true and the current output is streamed.
 
 > [!NOTE]  
-> The FPGA logic is reset when the clock frequency is changed, so you will need to reinitialise the DMA and maybe other blocks.
+> The CORDIC IP block can be configured to implement the streaming protocol internally. The `tlast`, `tuser` and `valid` signals can be entrained with the data and the block can automatically flush invalid data (blocking mode). All this logic is implemented externally to the module here to show how it would work in the general case.
 
-> [!NOTE]  
-> According to the documentation, the streaming busses connected to a VDMA should not have a clock frequency lower than the memory-mapped bus used to control the VDMA, which is 100MHz in the base overlay. It still seems to work if this condition is violated, but the long-term reliability is not clear.
+Compiling the pipelined version shows that the timing slack is now over 10ns, indicating that the Pixel Generator can run at over 100MHz, ignoring the potential for overclocking.
+
+![Timing analysis for the pipelined design, showing a WNS of 11.0ns](timing-pipelined.png)
