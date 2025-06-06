@@ -303,3 +303,5 @@ The second testbench, `test_AXIL.v`, is designed to test the AXI_Lite/MMIO inter
 ## Additional Guides
 
 [Adding a Block Memory to your logic and accessing it from the CPU](doc/bram.md)
+
+[Diagnosing and fixing timing problems](doc/timing.md)
