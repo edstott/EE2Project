@@ -53,7 +53,7 @@ Since the period of the `clk_fpga_3` is 20ns and the WNS is -3.58ns, we can dedu
 > [!NOTE]  
 > The original version of the base overlay connects the pixel generator to `clk_fpga_1`, with a frequency of 143 MHz. Under this clock, the WNS would be -16.6ns.
 
-You can find out exactly which registers in your design have timing violations by right-clicking on the affected clock in the report and choosing `report timing`. The resulting list shows pairs of registers where the propagation delay between them is too great. All the paths shown here start at a register holding part of the pixel coordinates and terminate at the VDMA, which shows that the critical timing path includes the entire computation of the pixel colour and packing it into the output stream.
+You can find out exactly which registers in your design have timing violations by right-clicking on the affected clock in the report and choosing 'report timing'. The resulting list shows pairs of registers where the propagation delay between them is too great. All the paths shown here start at a register holding part of the pixel coordinates and terminate at the VDMA, which shows that the critical timing path includes the entire computation of the pixel colour and packing it into the output stream.
 
 ![A list of paths that fail timing](timing-checks.png)
 
@@ -159,14 +159,14 @@ In the CORDIC example from above, the IP block can be configured to include pipe
 Setting the pipelining mode to 'Optimal' and viewing the implementation details shows that the block will have a latency of 12 clock cycles. Now the block will have a clock input and there is also an option for a clock enable, which can be used to stall the pipeline when the rest of the system is not ready. The instantiation looks like this:
 
 ```verilog
-wire cordic_en = valid_int & (ready | ~cordic_valid)
+wire cordic_en = ready | ~cordic_valid
 cordic_0 cordic(    .aclk(out_stream_aclk),
                     .aclken(cordic_en),
                     .s_axis_cartesian_tdata({6'b0, x_centre >>> 1, 6'b0, y_centre >>> 1}),
                     .m_axis_dout_tdata(result));
 ```
 
-The clock connection is straightforward but the enable (`cordic_en`) is more complicated. First, we need to add some shift registers that will pipeline the `tlast`, `tuser` and `valid` signals:
+The clock connection is straightforward but the enable (`cordic_en`) requires some logic. First, we need to add some shift registers that will pipeline the `tlast`, `tuser` and `valid` signals:
 
 ```verilog
 reg [11:0] valid_shift = 12'h0, tlast_shift = 12'h0, tuser_shift = 12'h0;
@@ -188,7 +188,13 @@ Each shift register has 12 bits, the same as the latency of the CORDIC module. T
 
 There is also a shift register for the `valid` signal. In this code, the input pixel coordinates are always valid so the input to this shift register (`valid_int`) is just 1. But when the logic is first initialised the contents of the CORDIC pipeline are not valid, so this shift register is initialised to zeros. Only after 12 clock cycles (with enable true) will the first valid output emerge from the CORDIC block and the output of the shift register become true.
 
-At startup, we need to automatically flush the pipeline to get the first valid output to the streaming interface and this explains the enable logic `cordic_en = valid_int & (ready | ~cordic_valid)`. Assuming the input coordinates are valid (which is always true here), the pipeline will advance if the streaming interface is ready for data, or if the pipeline output is not valid. If the output is valid and the stream is ready, then a pixel will be transferred over the interface and the pipeline should advance to generate the next pixel. If the pipeline output is not valid then the pipeline should advance until the output is valid; no streaming transfer will take place regardless of the state of `ready` because the output is not valid. Finally, if the output is valid but the stream is not ready, the pipeline should stall until `ready` becomes true and the current output is streamed.
+At startup, we need to automatically flush the pipeline to get the first valid output to the streaming interface and this explains the enable logic `cordic_en = ready | ~cordic_valid`. The pipeline will advance if the streaming interface is ready for data, or if the pipeline output is not valid. That creates three cases for the interaction of the pipeline and the streaming interface:
+
+| `ready` | `cordic_valid` | `cordic_en` | Outcome |
+| ------- | -------------- | ----------- | ------- |
+| True    | True           | True        | The current pipeline output is transmitted to stream receiver and the pipeline advances |
+| False   | True           | False       | The pipeline stalls because the output is valid but the stream receiver is not ready for it |
+| Don't Care | False       | True        | The pipeline advances to flush the invalid output. No streaming transfer takes place because the output is not valid|
 
 > [!NOTE]  
 > The CORDIC IP block can be configured to implement the streaming protocol internally. The `tlast`, `tuser` and `valid` signals can be entrained with the data and the block can automatically flush invalid data (blocking mode). All this logic is implemented externally to the module here to show how it would work in the general case.
@@ -196,3 +202,15 @@ At startup, we need to automatically flush the pipeline to get the first valid o
 Compiling the pipelined version shows that the timing slack is now over 10ns, indicating that the Pixel Generator can run at over 100MHz, ignoring the potential for overclocking.
 
 ![Timing analysis for the pipelined design, showing a WNS of 11.0ns](timing-pipelined.png)
+
+### Loop Pipelining
+
+The CORDIC-based pixel generator is simple to pipeline because it is feed-forward with a fixed latency; each pixel coordinate enters the pipeline and 12 clock edges later, the result emerges. At any instant, 12 calculations are in progress, each at a different stage of the pipeline.
+
+Pipelining an iterative algorithm is more complex because each calculation must pass through the pipeline multiple times. The output of the pipeline is fed back to the input via a multiplexer to allow the initial values for future calculations to be inserted. When each calculation reaches its terminating condition, the result is output and the multiplexer used to load in the next input and reset any internal counters or state.
+
+The diagram below shows the general layout of a loop-pipelined algorithm. As before, control logic should be used to stall the pipeline if there is data ready for output but the receiver is not ready. A shift register is used to store the flags associated with each calculation, and this is also looped back via a multiplexer. Valid and ready signals go in both directions to ensure data is correctly transferred in and out.
+
+![General block diagram of a loop-pipelined algorithm](loop-pipeline.svg)
+
+Some iterative algorithms do not run for a fixed number of loops, which means that some calculations in the pipeline may finish before others that started earlier. The ordering of data must be preserved in a streaming architecture, so some extra control logic may be needed to ensure data does not get mixed up. A counter could be used to indicate which of the pipeline slots or threads should be output next. Calculations that finish early may be required to continue looping until the stream is ready for them, or they could be placed into FIFO buffers (one per thread) so that the pipeline can be freed up to make a start on the next problem.
