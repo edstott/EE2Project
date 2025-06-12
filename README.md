@@ -41,7 +41,7 @@ Finally, every project will draw upon various non-technical skill areas, includi
 
 ### Report and Reflection
  
-| Weighting of report in module mark | 50/100 |
+| Weighting of report in module mark | 45/100 |
 | ----------------------------------------- | ------ |
 | **Word Limit**                          | **10000**  |
 
@@ -50,7 +50,6 @@ Finally, every project will draw upon various non-technical skill areas, includi
 | Design Process        | 20/100    | • Logical progression of design from top-level requirements to detailed implementation and evaluation<br> • Discussion of all important design decisions with quantitative and qualitative evidence <br> • Interesting discussion of project planning and organisation | •  Requirements in place for most of the functionality of the system<br> • Discussion of design decisions, but some unclear reasoning and/or unimportant details <br> • Full breakdown of task allocation to group members | • Some elaboration of requirements beyond original points in project brief<br> • Some discussion of design decisions, but important aspects given trivial or no reasoning |
 | Implementation        | 60/100    | • Design is a technically complex system of interacting components<br> • Advanced techniques and skills are applied, requiring research beyond module content | • Design is a mostly-functional system, maybe some elements are not integrated <br>• Design makes good use of EEE/EIE module content<br> | • Elements of the project are designed, but the project is not functional as a complete system <br> • Some design elements are technically plausible
 | Evaluation            | 20/100    | • Evidence that tests all requirements<br> • Evaluation of top-level system and individual subsystems <br> • Appropriate tests and metrics devised<br> • Informative visual presentation of data | • Evaluation of most requirements<br> • Use of quantitative and qualitative data | • Some elements of the design are evaluated, but some important aspects are omitted <br> • Low-quality evidence of design outcome
-| Reflection            | 5/100     | • Individual reflection answers all the questions |  | • Individual reflection does not answer all the questions |
 
 ### Demonstration
 
@@ -68,7 +67,7 @@ Finally, every project will draw upon various non-technical skill areas, includi
 
 ### Individual Reflection
 
-| Weighting of presentation in module mark: | You must pass each component |
+| Weighting of presentation in module mark: | 5/100 |
 | ----------------------------------------- | ------ |
 
 | Area of assessment    | Pass |
