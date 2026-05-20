@@ -221,7 +221,13 @@ Most of the lab equipment (certain PSUs, the load bank and the DMM) from the EE2
 | V<sub>OC</sub> | ~8.5 | V |
 | I<sub>SC</sub> | ~1000 | mA |
 
-### New LED Driver SMPS
+### Triple LED Driver SMPS
+
+| ![Photo of domestic load emulator](doc/pingpongping.jpg) |
+|:--:|
+| _Photo of your Domestic Load Emulator_ | 
+
+[Example code for LED Driver](Triple_LED_Driver_Example.py)  - This loops through brightnesses for all 3 LEDs, you will need to determine your own setpoints
 
 [Schematic of the LED Driver](doc/LED_Driver_2026.pdf)
 
@@ -244,33 +250,3 @@ Most of the lab equipment (certain PSUs, the load bank and the DMM) from the EE2
 | Power Rating | ~3 | W |
 | Voltage Drop (varies with colour) | ~3 | V |
 | Current Rating (also varies with colour) | ~1000 | mA |
-
-### OLD LED Driver SMPS - Left this here incase we need to use the old boards temporarily
-
-| ![Photo of old LED setup](doc/old_led.jpg) |
-|:--:|
-| _Old LED Driver and LED_ | 
-
-[Schematic of the LED Driver](doc/LED_Driver_SCM.pdf)
-
-[Example code for LED Driver - This will cycle through different current references for a closed loop current controller](LED_Driver_Example.py)
-
-| Specification | Value | Unit |
-| ------------- | ----- | ---- |
-| Circuit Type | Buck | |
-| Current Sensing | Unidirectional at output negative line | |
-| Controller Type | Raspberry Pi Pico | |
-| Controller Power Source | USB or Input Port | |
-| Base Code | LED_Driver.py | |
-| PWM Frequency | 100 | kHz |
-| Input Voltage | 7 - 17.5 | V |
-| Output Voltage | 0 - 17.5 | V |
-| Max Current | ~500 | mA |
-
-### OLD LED Loads - Left this here incase we need to use the old boards temporarily
-
-| Specification | Value | Unit |
-| ------------- | ----- | ---- |
-| Power Rating | 1 | W |
-| Voltage Drop (varies with colour) | ~3 | V |
-| Current Rating (also varies with colour) | ~300 | mA |
